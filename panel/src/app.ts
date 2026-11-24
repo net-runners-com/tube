@@ -2417,6 +2417,53 @@ document.addEventListener('pointerdown', (e) => {
   if (document.activeElement === $('#volSlider')) $('#volSlider').blur()
 }, true)
 
+/* Seek-bar preview: one frame of YouTube's storyboard sheets (5×5 frames of 160×90), fetched through the worker. */
+let boardFor = ''
+const sheets = new Map<string, Promise<string>>()
+function sheet(url: string): Promise<string> {
+  if (boardFor !== S.watch?.id) (sheets.clear(), (boardFor = S.watch?.id ?? ''))
+  let p = sheets.get(url)
+  if (!p) {
+    p = call('tube.images', { urls: [url] }).then((r) => {
+      const d = r.images?.[url] ?? ''
+      if (!d) sheets.delete(url) // failed: try again on the next hover
+      return d
+    })
+    sheets.set(url, p)
+  }
+  return p
+}
+let previewWant = -1
+let previewSheet = ''
+function showPreview(at: number | null, x: number, width: number) {
+  const b = S.watch?.board
+  const el = $('#seekPrev')
+  if (!b || at == null || S.watch?.live) return void (el.hidden = true)
+  const per = b.cols * b.rows
+  const i = Math.max(0, Math.floor(at / b.every))
+  const s = Math.min(b.sheets.length - 1, Math.floor(i / per))
+  const k = Math.min(per - 1, i - s * per)
+  el.hidden = false
+  el.style.width = `${b.w}px`
+  el.style.height = `${b.h}px`
+  const half = b.w / 2 + 6
+  el.style.left = `${Math.max(half, Math.min(width - half, x))}px`
+  previewWant = i
+  void sheet(b.sheets[s]).then((d) => {
+    if (previewWant !== i || !d) return
+    if (previewSheet !== b.sheets[s]) {
+      el.style.backgroundImage = `url("${d}")`
+      el.style.backgroundSize = `${b.cols * b.w}px ${b.rows * b.h}px`
+      previewSheet = b.sheets[s]
+    }
+    el.style.backgroundPosition = `-${(k % b.cols) * b.w}px -${Math.floor(k / b.cols) * b.h}px`
+  })
+}
+// fetch every sheet as soon as the pointer reaches the bar, so scrubbing shows frames without waiting
+$('#seekbar').addEventListener('pointerenter', () => {
+  for (const u of S.watch?.board?.sheets ?? []) void sheet(u)
+})
+
 /** Where a point on the seek bar lands: seconds into the video, or into a live stream's rewind window. */
 function seekTimeAt(f: number): number | null {
   if (S.watch?.live) {
@@ -2445,6 +2492,7 @@ $('#seekbar').addEventListener('pointermove', (e) => {
   tip.textContent = at == null ? '' : S.watch?.live ? (behind < 5 ? 'LIVE' : `-${clock(behind)}`) : clock(at)
   const half = tip.offsetWidth / 2 + 6
   tip.style.left = `${Math.max(half, Math.min(r.width - half, f * r.width))}px`
+  showPreview(at, f * r.width, r.width)
   $('#pHover').style.width = `${f * 100}%`
 })
 $('#seekbar').addEventListener('pointerdown', (e) => {

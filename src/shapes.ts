@@ -48,6 +48,8 @@ export type Watch = {
   duration: number
   /** Most replayed: how often each slice of the video is watched, 0–1, oldest slice first (empty when YouTube has none). */
   heat: number[]
+  /** Seek-bar previews: sheets of cols×rows frames, w×h each, one frame every `every` seconds. */
+  board: Board | null
   uploaded: string
   thumb: string
   live: boolean
@@ -58,6 +60,8 @@ export type Watch = {
   /** Live streams: key for `tube.hls` (the HLS master playlist stays in the worker). */
   hls: string | null
 }
+
+export type Board = { w: number; h: number; cols: number; rows: number; every: number; sheets: string[] }
 
 /** A caption track the panel can ask for (`tube.captions`); the URL stays in the worker. */
 export type Caption = { key: string; lang: string; name: string; auto: boolean; /** auto captions in the spoken language (not machine-translated) */ orig?: boolean }

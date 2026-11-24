@@ -9,6 +9,7 @@ import * as tools from './tools'
 import { updateTube } from './update'
 import { chatPoll, chatStart } from './chat'
 import { channel, channelAvatar, comments, downloadState, playlistVideos, startDownload, type Caption, parseJson3, pickCaptions, type ChannelTab, pickFormats, search, type SearchOpts, type Track, type Watch, ytdlp, YTDLP, thumbOf } from './yt'
+import type { Board } from './shapes'
 
 /** Panel answers are capped at 1 MiB of JSON: 720 KB of bytes is 960 KB of base64. */
 const CHUNK = 720_000
@@ -98,6 +99,15 @@ async function watch(id: string, maxHeight: number, fresh = false): Promise<Watc
   // a hover prefetch may already be resolving this video: wait for it instead of a second yt-dlp
   return shared(`w:${ck}:${fresh ? 'f' : ''}`, () => resolveWatch(id, maxHeight, ck))
 }
+/** The sharpest storyboard (sb0, 160×90 frames) yt-dlp lists, for previews over the seek bar. */
+function storyboard(formats: any[]): Board | null {
+  const sb = formats.filter((f) => /^sb\d/.test(f.format_id ?? '') && f.fragments?.length && f.rows && f.columns).sort((a, b) => b.width - a.width)[0]
+  if (!sb) return null
+  const every = sb.fragments[0].duration / (sb.rows * sb.columns)
+  if (!(every > 0)) return null
+  return { w: sb.width, h: sb.height, cols: sb.columns, rows: sb.rows, every, sheets: sb.fragments.map((f: any) => f.url) }
+}
+
 async function resolveWatch(id: string, maxHeight: number, ck: string): Promise<Watch> {
   // Which stream URLs googlevideo accepts depends on the client yt-dlp asked: visionOS URLs play,
   // TV (TVHTML5) and signed-in web ones answer 403 (they want PO tokens). yt-dlp's default mix
@@ -142,6 +152,7 @@ async function resolveWatch(id: string, maxHeight: number, ck: string): Promise<
     views: j.view_count ?? null,
     likes: j.like_count ?? null,
     duration: j.duration ?? 0,
+    board: storyboard(j.formats ?? []),
     heat: Array.isArray(j.heatmap) ? j.heatmap.map((h: any) => Math.round((h.value ?? 0) * 100) / 100) : [],
     uploaded: j.upload_date ?? '',
     thumb: thumbOf(id),

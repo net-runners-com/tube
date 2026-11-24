@@ -31,8 +31,8 @@ body { font-family: "Google Sans", "Product Sans", -apple-system, BlinkMacSystem
 .seek-knob { opacity: 0; transition: opacity .15s, transform .15s; }
 #stage.awake .seek-knob, #stage:not(.playing) .seek-knob, #seekbar.drag .seek-knob { opacity: 1; }
 #seekbar:hover .seek-knob, #seekbar.drag .seek-knob { transform: translateX(-50%) scale(1.25); }
-#heat, #seekTip, #pHover { opacity: 0; transition: opacity .15s; }
-#seekbar:hover #heat, #seekbar.drag #heat, #seekbar:hover #seekTip, #seekbar.drag #seekTip, #seekbar:hover #pHover { opacity: 1; }
+#heat, #seekTip, #pHover, #seekPrev { opacity: 0; transition: opacity .15s; }
+#seekbar:hover #seekPrev, #seekbar.drag #seekPrev, #seekbar:hover #heat, #seekbar.drag #heat, #seekbar:hover #seekTip, #seekbar.drag #seekTip, #seekbar:hover #pHover { opacity: 1; }
 #stage.asleep:not(.menu) #controls, #stage.asleep:not(.menu) #shade { opacity: 0; }
 #stage.asleep:not(.menu) #controls { pointer-events: none; }
 #stage:fullscreen { border-radius: 0; }
