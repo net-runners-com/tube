@@ -3,7 +3,40 @@
   "id": "tube",
   "name": "Tube",
   "version": "1.0.0",
-  "description": "Browse and watch YouTube in a sidebar panel. The worker talks to YouTube through yt-dlp; the panel streams video with Media Source.",
+  "publisher": "net-runners-com",
+  "description": "YouTube in Orca's sidebar: browse, search and watch videos, Shorts and live streams, with a Lofi music-player mode, captions, playlists and your account. Needs yt-dlp.",
+  "icon": "assets/icon.png",
+  "cover": {
+    "path": "assets/cover.jpg",
+    "alt": "Tube panels in Orca: Home, a lofi live stream in Lofi mode with its visualizer, and Shorts"
+  },
+  "screenshots": [
+    {
+      "path": "assets/home.jpg",
+      "alt": "Tube Home with subscriptions and recommendations, next to the watch page",
+      "caption": "Your YouTube, next to your code"
+    },
+    {
+      "path": "assets/lofi.jpg",
+      "alt": "Lofi mode: the video in a floating card, a colour visualizer and an Up Next list",
+      "caption": "Lofi mode: a music player for long sessions"
+    },
+    {
+      "path": "assets/explore.jpg",
+      "alt": "Explore searching Shorts with Videos, Channels and Shorts tabs",
+      "caption": "Videos, channels and Shorts"
+    },
+    {
+      "path": "assets/watch.jpg",
+      "alt": "The watch page with actions, comments and more videos",
+      "caption": "Everything under the player"
+    },
+    {
+      "path": "assets/themes.jpg",
+      "alt": "Theme settings with styles, accent colours and layout",
+      "caption": "Themes, layout and your own CSS"
+    }
+  ],
   "engines": {
     "orca": ">=1.4.246"
   },
