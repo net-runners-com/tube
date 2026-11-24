@@ -4,6 +4,7 @@
   "name": "Tube",
   "version": "1.0.0",
   "publisher": "net-runners-com",
+  "license": "MIT",
   "description": "YouTube in Orca's sidebar: browse, search and watch videos, Shorts and live streams, with a Lofi music-player mode, captions, playlists and your account. Needs yt-dlp.",
   "icon": "assets/icon.png",
   "cover": {
