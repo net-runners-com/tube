@@ -80,7 +80,7 @@ youtube.com page, no ads in the feed.
 - Six themes, seven accent colors, or your own colors.
 - Layout: size, corners, and the parts of the page you'd rather hide.
 - **Custom CSS** and **custom scripts** for anything else.
-- English and Japanese, following Orca's language.
+- In Orca's languages: English, 简体中文, 繁體中文, 한국어, 日本語, Español, Français, Português, Русский, Türkçe and Deutsch — following Orca's own setting.
 
 ## Install
 
@@ -92,24 +92,19 @@ Or from a terminal:
 orca plugin install net-runners-com/tube
 ```
 
-### Requirements
+**That's all.** Tube runs on macOS, Windows and Linux. The first time it opens, it downloads the
+video tools it needs (yt-dlp, Node.js and ffmpeg) into its own folder — about half a minute,
+verified file by file — so there is nothing else to install.
 
-- **macOS**
-- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** with its extras, kept up to date — YouTube
-  changes often:
-
-  ```sh
-  pipx install 'yt-dlp[default]'      # or: uv tool install 'yt-dlp[default]'
-  ```
-
-- **Node.js** or **Deno** on your PATH (yt-dlp uses it to read YouTube's player).
+To update, use **Settings ▸ Updates** in Tube, or Orca's plugin settings. The tools inside come
+with each Tube version.
 
 ## Tips
 
 - **Signing in**: open the account button (top right) and pick the browser profile you use
-  YouTube in. macOS asks once for keychain access to read that browser's sign-in.
-- **Playback stops with an error?** Update yt-dlp first; it fixes most problems.
-- **Downloads** go to `~/Downloads` as MP4, at the quality set in Settings.
+  YouTube in. On macOS the system asks once for keychain access to read that browser's sign-in.
+- **Playback stops with an error?** Update Tube (Settings ▸ Updates); new versions bring fixed video tools.
+- **Downloads** go to your Downloads folder as MP4, at the quality set in Settings.
 - **Offline**: Tube shows a notice and picks up again on its own when you're back online.
 
 ## Privacy

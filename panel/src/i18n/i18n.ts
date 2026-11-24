@@ -8,16 +8,35 @@
 //
 // Adding a language: copy ja.ts to <code>.ts, translate the values, add it to DICTS and LANGS.
 
+import de from './de'
 import en from './en'
+import es from './es'
+import fr from './fr'
 import ja from './ja'
+import ko from './ko'
+import ptBR from './pt-BR'
+import ru from './ru'
+import tr from './tr'
+import zhCN from './zh-CN'
+import zhTW from './zh-TW'
 
 /** Every language file, bundled (they are small). Add a new one here and to LANGS. */
-const DICTS: Record<string, Record<string, string>> = { en, ja }
+const DICTS: Record<string, Record<string, string>> = { en, 'zh-CN': zhCN, 'zh-TW': zhTW, ko, ja, es, fr, 'pt-BR': ptBR, ru, tr, de }
 
-export const LANGS = [
+/** The languages Orca itself offers, in Orca's order, each named in its own language. */
+export const LANGS: [string, string][] = [
   ['auto', 'System'],
   ['en', 'English'],
-  ['ja', '日本語']
+  ['zh-CN', '中文（简体）'],
+  ['zh-TW', '繁體中文（台灣）'],
+  ['ko', '한국어'],
+  ['ja', '日本語'],
+  ['es', 'Español'],
+  ['fr', 'Français'],
+  ['pt-BR', 'Português (Brasil)'],
+  ['ru', 'Русский'],
+  ['tr', 'Türkçe'],
+  ['de', 'Deutsch']
 ]
 
 let code = 'en'
@@ -49,10 +68,13 @@ function compile(dict) {
   }
 }
 
-/** Orca's UI language, as one of ours ('en' when we don't have it). */
+/** Orca's UI language (a BCP-47 tag like "zh-Hant-TW" or "pt-BR"), as one of ours; 'en' otherwise. */
 export function orcaLang() {
-  const tag = (globalThis.orca?.locale || navigator.language || 'en').slice(0, 2).toLowerCase()
-  return LANGS.some(([k]) => k === tag && k !== 'auto') ? tag : 'en'
+  const tag = String(globalThis.orca?.locale || navigator.language || 'en').toLowerCase()
+  if (tag.startsWith('zh')) return /hant|tw|hk|mo/.test(tag) ? 'zh-TW' : 'zh-CN'
+  if (tag.startsWith('pt')) return 'pt-BR'
+  const two = tag.slice(0, 2)
+  return LANGS.some(([k]) => k === two) ? two : 'en'
 }
 /** The language actually used for a setting ('auto' follows Orca's language). */
 export function resolve(pref) {

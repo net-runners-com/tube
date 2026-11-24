@@ -4,6 +4,7 @@ import { svg, I, NAV_ICONS } from './icons'
 // network work (src/worker.ts) and the player streams through it (player.js).
 import { Player } from './player'
 import type { Item, State } from './types'
+import { CSS_TEMPLATE, SCRIPT_TEMPLATE } from './templates'
 
 // Elements are typed loosely on purpose: the panel reads .value / .checked / .dataset off whatever it queried.
 type El = HTMLInputElement
@@ -575,7 +576,7 @@ async function renderChannel() {
 }
 
 /** Shown in Settings ▸ About (keep in step with orca-plugin.json). */
-const ABOUT = { version: '1.0.0', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube' }
+const ABOUT = { version: '1.1.0', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube' }
 const LIB_TABS = () =>
   S.account
     ? [['history', 'History'], ['playlists', 'Playlists'], ['watchlater', 'Watch later'], ['liked', 'Liked'], ['saved', 'Saved']]
@@ -673,11 +674,8 @@ function renderSettings() {
          <textarea id="cssCode" data-draft="css" spellcheck="false" placeholder="/* e.g. */
 .clamp2 { -webkit-line-clamp: 3; }
 :root { --brand: 61 107 242; }" class="mt-3 h-40 w-full resize-y rounded-[12px] border border-white/10 bg-black/30 p-3 font-mono text-[11.5px] leading-relaxed outline-none focus:border-brand">${esc(S.drafts.css ?? S.theme.css)}</textarea>
-         <button data-act="saveCss" class="mt-2 rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button>
-         <details class="mt-3 text-[11.5px] text-mute"><summary class="cursor-pointer">Parts you can style</summary>
-           <p class="mt-2 leading-relaxed">Colors: <code class="text-[#ddd]">--ink --panel --surface --line --brand --mute</code> (space-separated RGB, e.g. <code class="text-[#ddd]">61 107 242</code>). <code class="text-[#ddd]">--zoom</code> scales everything.</p>
-           <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-[10.5px] text-[#ccc]">${CSS_PARTS.map(([sel, what]) => `<span>${sel}</span><span class="font-sans text-mute">${what}</span>`).join('')}</div>
-         </details>
+         <div class="mt-2 flex flex-wrap gap-2"><button data-act="saveCss" class="rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button>
+           <button data-act="templateCss" class="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">${I.download(14)}<span>Download template</span></button></div>
        </div>`
     )}
     ${card(
@@ -687,7 +685,7 @@ function renderSettings() {
            <svg class="mt-0.5 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 1.5 21h21zM11 9h2v6h-2zm0 8h2v2h-2z"/></svg>
            <p>For security reasons, only use code you understand or code written by a developer you trust. Scripts run inside the Tube panel with its access (your YouTube session, Orca storage).</p></div>
          <textarea id="scriptCode" data-draft="script" spellcheck="false" placeholder="// runs in the Tube panel, e.g.\ndocument.querySelector('#nav').style.opacity = '.8'" class="mt-3 h-40 w-full resize-y rounded-[12px] border border-white/10 bg-black/30 p-3 font-mono text-[11.5px] leading-relaxed outline-none focus:border-brand">${esc(S.drafts.script ?? S.script.code)}</textarea>
-         <div class="mt-2 flex gap-2"><button data-act="saveScript" class="rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button><button data-act="runScript" class="rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">Run now</button></div>
+         <div class="mt-2 flex flex-wrap gap-2"><button data-act="saveScript" class="rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button><button data-act="runScript" class="rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">Run now</button><button data-act="templateScript" class="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">${I.download(14)}<span>Download template</span></button></div>
          <label class="mt-3 flex items-center gap-2.5 text-[12.5px]"><input type="checkbox" data-act="toggleScriptAuto" ${S.script.auto ? 'checked' : ''} class="h-4 w-4 accent-[rgb(var(--brand))]">Run automatically when Tube opens</label>
        </div>`
     )}
@@ -1911,6 +1909,19 @@ document.addEventListener('load', (e) => {
   } catch {}
 }, true)
 
+/** Offers a template in Orca's save dialog; where there is none, puts it in the editor instead. */
+async function saveTemplate(name: string, mime: string, text: string) {
+  if (orca.files) {
+    const r = await orca.files.saveAs({ suggestedName: name, mimeType: mime, data: text }).catch(() => null)
+    if (r?.status === 'saved') toast(t('Template saved'), 'success')
+    return
+  }
+  const box = $(mime === 'text/css' ? '#cssCode' : '#scriptCode')
+  box.value = text
+  S.drafts[mime === 'text/css' ? 'css' : 'script'] = text
+  toast(t('Template added to the editor'))
+}
+
 /* ---------------- language ---------------- */
 async function changeLang(pref) {
   S.lang = pref
@@ -1934,7 +1945,6 @@ const THEMES = {
 const ACCENTS = { red: ['Red', 'e3262b'], blue: ['Royal Blue', '3d6bf2'], teal: ['Teal', '14b8a6'], green: ['Green', '22a35a'], purple: ['Purple', '8b5cf6'], orange: ['Orange', 'f97316'], pink: ['Pink', 'ec4899'] }
 const COLOR_KEYS = [['brand', 'Accent'], ['ink', 'Background'], ['panel', 'Cards'], ['surface', 'Buttons'], ['line', 'Lines'], ['mute', 'Muted text']]
 const LAYOUT_PARTS = [['tools', 'Tools under the video (Loop, Autoplay, Audio)'], ['actions', 'Like / views / copy / save row'], ['comments', 'Comments and live chat'], ['related', 'More videos under the player'], ['labels', 'Labels in the bottom bar'], ['chips', 'Category chips on Home']]
-const CSS_PARTS = [['#app', 'whole panel'], ['#nav', 'bottom bar'], ['#mini', 'mini player'], ['#v-home', 'Home'], ['#v-explore', 'Explore'], ['#v-channels', 'Channels'], ['#v-channel', 'a channel'], ['#v-library', 'Library'], ['#v-settings', 'Settings'], ['#v-watch', 'watch page'], ['#stage', 'player'], ['#controls', 'player controls'], ['#tools', 'tools row'], ['#watchInfo', 'title / actions'], ['#watchActions', 'action row'], ['#comments', 'comments / chat'], ['#chatList', 'chat messages'], ['#watchMore', 'more videos'], ['.sticky-head', 'page headers'], ['#searchOverlay', 'search'], ['#sheet', 'account sheet']]
 const themeColors = () => ({ ...(THEMES[S.theme.preset] ?? THEMES.default), brand: (ACCENTS[S.theme.accent] ?? ACCENTS.red)[1], ...S.theme.custom })
 function applyTheme() {
   const c = themeColors()
@@ -2770,6 +2780,10 @@ document.addEventListener('click', (e) => {
       }
       saveTheme()
       return toast('Custom CSS saved')
+    case 'templateCss':
+      return void saveTemplate('tube-custom.css', 'text/css', CSS_TEMPLATE)
+    case 'templateScript':
+      return void saveTemplate('tube-custom-script.js', 'text/javascript', SCRIPT_TEMPLATE)
     case 'saveScript':
       S.script.code = $('#scriptCode').value
       delete S.drafts.script

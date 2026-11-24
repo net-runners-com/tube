@@ -323,5 +323,8 @@ export default {
   'The script is empty': 'スクリプトが空です',
   'The script runs when Tube opens': 'Tube を開いたときに実行します',
   'Automatic run off': '自動実行: オフ',
-  'Script error: {why}': 'スクリプトエラー: {why}'
+  'Script error: {why}': 'スクリプトエラー: {why}',
+  'Download template': 'テンプレートをダウンロード',
+  'Template saved': 'テンプレートを保存しました',
+  'Template added to the editor': 'テンプレートをエディタに入れました',
 }
