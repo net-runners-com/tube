@@ -51,6 +51,8 @@ export const I = {
   fwd10: (s = 26) => svg('<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M20 3.5v4h-4"/><text x="12" y="15.3" text-anchor="middle" font-size="7.5" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">10</text>', { size: s, sw: 1.8 }),
   listPlus: (s = 20) => svg('<path d="M4 6h11M4 11h11M4 16h7"/><path d="M18 13v7M14.5 16.5h7"/>', { size: s, sw: 1.6 }),
   lock: (s = 12) => svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', { size: s, sw: 1.8 }),
+  // Tube's mark: a squeeze tube, crimped end up, cap down, with a highlight
+  tube: (s = 16) => svg('<path d="M6 3h12v2.6H6z"/><path d="M6.6 5.6h10.8L15.2 18H8.8z"/><path d="M9 18h6v3.2H9z"/><path d="M9.6 8.4l.8 6.4"/>', { size: s, sw: 1.7 }),
   link: (s = 20) => svg('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L11.6 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.6-1.6"/>', { size: s, sw: 1.6 }),
   heart: (s = 12) => svg('<path d="M12 20.5s-8-4.6-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.1c0 5.8-8 10.4-8 10.4z"/>', { size: s, fill: 'currentColor' }),
   pin: (s = 11) => svg('<path d="M9 3h6l-1 6 3 3H7l3-3zM12 12v9"/>', { size: s, sw: 1.8 }),
