@@ -1,10 +1,9 @@
 // yt-dlp wrapper and the shapes the panel sees. Everything here runs in the worker (Node).
 import { innertubeAnon } from './chat'
+import { downloadsDir, isWin } from './platform'
+import { ffmpegPath, jsRuntime, ready, spawnTool, ytdlpPath } from './tools'
 import type { Caption, Channel, ChannelPage, Cue, Item, Track, Video, Watch } from './shapes'
 export type { Caption, Channel, ChannelPage, Cue, Item, Track, Video, Watch }
-import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { cookieCopy } from './auth'
 
@@ -58,32 +57,16 @@ export function parseJson3(data: any): Cue[] {
   return cues
 }
 
-const HOME = homedir()
-const BIN_DIRS = [
-  join(HOME, '.local/bin'),
-  join(HOME, '.nix-profile/bin'),
-  '/etc/profiles/per-user/' + (process.env.USER ?? '') + '/bin',
-  '/run/current-system/sw/bin',
-  '/opt/homebrew/bin',
-  '/usr/local/bin',
-  '/usr/bin'
-]
-const PATH = [...BIN_DIRS, process.env.PATH ?? ''].join(':')
-const which = (name: string) => BIN_DIRS.map((d) => join(d, name)).find((p) => existsSync(p))
-
-export const YTDLP = which('yt-dlp')
-/** yt-dlp needs a JS runtime to solve YouTube's signatures; Orca's own Node is not a plain `node`. */
-const JS = which('deno') ? [] : which('node') ? ['--js-runtimes', 'node:' + which('node')] : []
+/** yt-dlp's path once Tube's setup has it (see tools.ts); kept for the status line. */
+export const YTDLP = () => ytdlpPath() ?? null
 
 /** Runs yt-dlp with `-J`; signed in, it gets a private copy of the account cookies. */
-export function ytdlp(args: string[], { timeoutMs = 40_000, cookies = true } = {}): Promise<any> {
-  if (!YTDLP) return Promise.reject(new Error('yt-dlp not found. Install it (e.g. `pipx install yt-dlp`).'))
+export async function ytdlp(args: string[], { timeoutMs = 40_000, cookies = true } = {}): Promise<any> {
+  const bin = await ready()
+  const js = jsRuntime()
   const jar = cookies ? cookieCopy() : null
   return new Promise<any>((resolve, reject) => {
-    const p = spawn(YTDLP, ['--no-update', '--no-warnings', '-J', ...JS, ...(jar ? ['--cookies', jar.path] : []), ...args], {
-      env: { ...process.env, PATH },
-      stdio: ['ignore', 'pipe', 'pipe']
-    })
+    const p = spawnTool(bin, ['--no-update', '--no-warnings', '--ignore-config', '-J', ...js.args, ...(jar ? ['--cookies', jar.path] : []), ...args], js.env)
     const out: Buffer[] = []
     let err = ''
     p.stdout.on('data', (d: Buffer) => out.push(d))
@@ -100,8 +83,8 @@ export function ytdlp(args: string[], { timeoutMs = 40_000, cookies = true } = {
           return reject(e)
         }
       }
-      const last = err.trim().split('\n').filter((l) => l.startsWith('ERROR')).pop()
-      reject(new Error((last ?? err.trim().split('\n').pop() ?? 'yt-dlp failed').replace(/^ERROR:\s*/, '')))
+      const last = err.trim().split(/\r?\n/).filter((l) => l.startsWith('ERROR')).pop()
+      reject(new Error((last ?? err.trim().split(/\r?\n/).pop() ?? 'yt-dlp failed').replace(/^ERROR:\s*/, '')))
     })
   }).then(
     (v) => (jar?.commit(), v),
@@ -316,36 +299,44 @@ const downloads = new Map<string, Download>()
 export const downloadState = (id: string): Download | null => downloads.get(id) ?? null
 
 /** Saves the video (H.264 + AAC, merged to MP4 by ffmpeg) to ~/Downloads; progress via downloadState. */
-export function startDownload(id: string, maxHeight: number): Download {
+export async function startDownload(id: string, maxHeight: number): Promise<Download> {
   const cur = downloads.get(id)
   if (cur && !cur.done && !cur.error) return cur
-  if (!YTDLP) throw new Error('yt-dlp not found')
+  const bin = await ready()
+  const js = jsRuntime()
+  const ff = ffmpegPath()
   const st: Download = { pct: 0, done: false, file: '', error: '' }
   downloads.set(id, st)
   const h = Math.max(144, Math.min(2160, maxHeight | 0))
-  const p = spawn(
-    YTDLP,
+  const p = spawnTool(
+    bin,
     [
-      '--no-update', '--no-warnings', '--newline', '--no-playlist', ...JS,
+      '--no-update', '--no-warnings', '--ignore-config', '--newline', '--no-playlist', ...js.args,
+      ...(ff ? ['--ffmpeg-location', ff] : []),
       '--extractor-args', 'youtube:player_client=visionos,default',
       '-f', `bv*[height<=${h}][vcodec^=avc1]+ba[ext=m4a]/b[height<=${h}]/b`,
       '--merge-output-format', 'mp4',
-      '-o', join(HOME, 'Downloads', '%(title).150B [%(id)s].%(ext)s'),
-      '--progress-template', 'download:PCT %(progress._percent_str)s',
+      // the OS's Downloads folder; yt-dlp makes the file name valid for this OS (Windows forbids <>:"/\\|?* etc.)
+      '-o', join(downloadsDir(), '%(title).150B [%(id)s].%(ext)s'),
+      ...(isWin ? [] : ['--windows-filenames']), // portable names everywhere
+      // --print turns progress off unless --progress is given; bytes, not a formatted percent
+      '--progress', '--progress-template', 'download:PCT %(progress.downloaded_bytes)s %(progress.total_bytes)s %(progress.total_bytes_estimate)s',
       '--print', 'after_move:FILE %(filepath)s',
       `https://www.youtube.com/watch?v=${id}`
     ],
-    { env: { ...process.env, PATH }, stdio: ['ignore', 'pipe', 'pipe'] }
+    js.env
   )
   let parts = 0 // video and audio download one after the other: 0–50% then 50–100%
   let last = 0
   let err = ''
   p.stdout.on('data', (d: Buffer) => {
-    for (const line of d.toString().split('\n')) {
-      const pct = /^PCT\s*([\d.]+)%/.exec(line.trim())
+    for (const line of d.toString().split(/\r?\n/)) {
+      const pct = /^PCT\s+(\d+)\s+(\S+)\s+(\S+)/.exec(line.trim())
       if (pct) {
-        const v = Number(pct[1])
-        if (v < last - 50) parts++
+        const got = Number(pct[1])
+        const total = Number(pct[2]) || Number(pct[3]) || 0
+        const v = total ? Math.min(100, (got / total) * 100) : 0
+        if (v < last - 50) parts++ // video first, then audio: 0–50%, then 50–100%
         last = v
         st.pct = Math.min(99, Math.round((Math.min(parts, 1) * 100 + v) / 2))
       }
@@ -357,7 +348,7 @@ export function startDownload(id: string, maxHeight: number): Download {
   p.on('error', (e) => (st.error = e.message))
   p.on('close', (code) => {
     if (code === 0) Object.assign(st, { done: true, pct: 100 })
-    else st.error ||= (err.trim().split('\n').filter((l) => l.startsWith('ERROR')).pop() ?? `yt-dlp exited ${code}`).replace(/^ERROR:\s*/, '')
+    else st.error ||= (err.trim().split(/\r?\n/).filter((l) => l.startsWith('ERROR')).pop() ?? `yt-dlp exited ${code}`).replace(/^ERROR:\s*/, '')
   })
   return st
 }

@@ -277,13 +277,29 @@ async function copyText(text) {
   const r = await call('tube.copy', { text })
   return !r.error
 }
-let toastTimer: ReturnType<typeof setTimeout> | undefined
-function toast(text: string) {
-  const t = $('#toast')
-  t.textContent = text
-  t.style.opacity = '1'
-  clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => (t.style.opacity = '0'), 2200)
+/** A notice in the top right: closes itself after a few seconds (paused while hovered), or with ×. */
+function toast(text: string, kind: 'info' | 'success' | 'error' = 'info') {
+  const box = $('#toasts')
+  const el = document.createElement('div')
+  el.className = 'toast pointer-events-auto flex w-full items-start gap-2.5 rounded-[14px] border border-white/10 bg-[#2a2a2a]/95 py-2.5 pl-3.5 pr-2 text-[12.5px] leading-snug shadow-[0_10px_30px_rgba(0,0,0,.45)] backdrop-blur'
+  const icon =
+    kind === 'success'
+      ? '<span class="mt-[1px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[#22a35a] text-white"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>'
+      : kind === 'error'
+        ? '<span class="mt-[1px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-brand text-[12px] font-bold text-white">!</span>'
+        : ''
+  el.innerHTML = `${icon}<span class="min-w-0 flex-1 break-words pt-[1px]"></span><button class="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#aaa] hover:bg-white/10 hover:text-white" aria-label="Close">${I.close(13)}</button>`
+  el.querySelector('span.flex-1')!.textContent = text
+  const close = () => {
+    el.classList.add('out')
+    setTimeout(() => el.remove(), 200)
+  }
+  ;(el.querySelector('button') as HTMLButtonElement).onclick = (e) => (e.stopPropagation(), close())
+  let timer = setTimeout(close, 4500)
+  el.onmouseenter = () => clearTimeout(timer)
+  el.onmouseleave = () => (timer = setTimeout(close, 2500))
+  box.prepend(el)
+  while (box.childElementCount > 4) box.lastElementChild!.remove()
 }
 
 /* ---------------- shared pieces ---------------- */
@@ -675,6 +691,7 @@ function renderSettings() {
          <label class="mt-3 flex items-center gap-2.5 text-[12.5px]"><input type="checkbox" data-act="toggleScriptAuto" ${S.script.auto ? 'checked' : ''} class="h-4 w-4 accent-[rgb(var(--brand))]">Run automatically when Tube opens</label>
        </div>`
     )}
+    ${card('Updates', `<div id="updatesCard">${updatesHtml()}</div>`)}
     ${card(
       'About',
       line('Version', ABOUT.version) +
@@ -803,7 +820,7 @@ function dlButton(w) {
   const d = dls.get(w.id)
   const label = !d ? 'Download' : d.error ? 'Retry' : d.done ? 'Show file' : `${d.pct}%`
   const icon = d?.done ? I.done() : I.download()
-  return `<button data-act="download" id="dlBtn" class="flex min-w-0 flex-col items-center gap-1.5 ${d?.done ? 'text-brand' : ''}"><span class="${d?.done ? '' : 'text-white'}">${icon}</span><span class="tabular-nums">${label}</span></button>`
+  return `<button data-act="download" id="dlBtn" class="flex min-w-0 flex-col items-center gap-1.5 ${d?.done ? 'text-[#2fbf71]' : ''}"><span class="${d?.done ? '' : 'text-white'}">${icon}</span><span class="tabular-nums">${label}</span></button>`
 }
 function syncDl(id) {
   const b = $('#dlBtn')
@@ -823,8 +840,8 @@ async function download(w) {
     if (!s2) return
     dls.set(w.id, s2)
     syncDl(w.id)
-    if (s2.error) return toast(`Download failed: ${s2.error}`)
-    if (s2.done) return toast(`Saved: ${s2.file.split('/').pop()}`)
+    if (s2.error) return toast(`Download failed: ${s2.error}`, 'error')
+    if (s2.done) return toast(`Saved: ${s2.file.split(/[\\/]/).pop()}`, 'success')
     setTimeout(poll, 1000)
   }
   setTimeout(poll, 800)
@@ -1966,6 +1983,87 @@ function runUserScript(code) {
   el.remove()
 }
 
+/* ---------------- Settings ▸ Updates ---------------- */
+let upd: { latest?: string; busy?: boolean; checking?: boolean; error?: string } = {}
+const newer = (a: string, b: string) => {
+  const pa = a.replace(/^v/, '').split(/[.-]/).map(Number)
+  const pb = b.replace(/^v/, '').split(/[.-]/).map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0)
+  return false
+}
+/** Settings ▸ Updates: Tube itself (the tools inside come with each Tube version). */
+function updatesHtml() {
+  const L = upd.latest
+  const isNew = !!L && newer(L, ABOUT.version)
+  const status = L === undefined ? t('Not checked yet') : isNew ? t('{v} is available', { v: esc(L.replace(/^v/, '')) }) : t('Up to date')
+  const btn = isNew
+    ? `<button data-act="updateSelf" class="shrink-0 rounded-full bg-brand px-4 py-1.5 text-[12px] font-bold text-white disabled:opacity-50" ${upd.busy ? 'disabled' : ''}>${upd.busy ? t('Updating…') : t('Update')}</button>`
+    : `<button data-act="checkUpdates" class="shrink-0 rounded-full border border-line px-4 py-1.5 text-[12px] hover:bg-white/5 disabled:opacity-50" ${upd.checking ? 'disabled' : ''}>${upd.checking ? t('Checking…') : t('Check for updates')}</button>`
+  return `<div class="flex items-center gap-3 px-4 py-4">
+      <span class="grid h-[30px] w-[40px] shrink-0 place-items-center rounded-[8px] bg-brand text-white">${I.tube(22)}</span>
+      <span class="min-w-0 flex-1"><span class="block text-[13.5px] font-medium">Tube ${ABOUT.version}</span><span class="mt-0.5 block text-[11.5px] ${isNew ? 'text-[#2fbf71]' : 'text-mute'}">${status}</span></span>
+      ${btn}
+    </div>${upd.error ? `<p class="px-4 pb-3 text-[11.5px] leading-relaxed text-[#ffb4b4]">${esc(upd.error)}</p>` : ''}`
+}
+function syncUpdates() {
+  const box = $('#updatesCard')
+  if (box) box.innerHTML = updatesHtml()
+}
+async function checkUpdates() {
+  upd.checking = true
+  syncUpdates()
+  const r = await call('tube.latest')
+  upd.checking = false
+  upd.latest = r.tube ?? ''
+  syncUpdates()
+  const isNew = !!upd.latest && newer(upd.latest, ABOUT.version)
+  toast(isNew ? t('Tube {v} is available', { v: upd.latest.replace(/^v/, '') }) : t('Tube is up to date'), isNew ? 'info' : 'success')
+}
+async function updateSelf() {
+  upd.busy = true
+  upd.error = ''
+  syncUpdates()
+  toast(t('Updating Tube…'))
+  const r = await call('tube.updateSelf', {}, 240_000)
+  upd.busy = false
+  if (r?.ok) toast(t('Tube updated to {v}', { v: r.version || '' }), 'success') // Orca restarts Tube with it
+  else {
+    upd.error = r?.needsApproval ? t('This version asks for new access. Update it in Orca: Settings ▸ Plugins.') : r?.error || t('Update failed')
+    toast(upd.error, 'error')
+  }
+  syncUpdates()
+}
+/** When Tube starts: say so if a newer Tube is out (the worker checked once, at its start). */
+async function noticeNewVersion() {
+  const r = await call('tube.startupLatest')
+  if (!r.tube) return
+  upd.latest = r.tube
+  if (newer(r.tube, ABOUT.version)) toast(t('Tube {v} is available — update it in Settings ▸ Updates', { v: r.tube.replace(/^v/, '') }))
+}
+
+/* ---------------- first start ---------------- */
+// The worker installs its tools on first start; until yt-dlp is in place the panel shows progress.
+const SETUP_STEPS: Record<string, string> = { 'yt-dlp': 'Downloading the video engine (yt-dlp)…', node: 'Preparing the player helper…', ffmpeg: 'Downloading ffmpeg for downloads…' }
+async function waitForSetup() {
+  for (let shown = false; ; ) {
+    const r = await callRaw('tube.setup')
+    const st = r?.setup
+    if (!st || (st.stage === 'ready' && r.tools?.ytdlp)) {
+      $('#setupScreen').hidden = true
+      return
+    }
+    // ffmpeg and the runtime may still be installing once yt-dlp works: no need to block for them
+    if (st.stage === 'working' && r.tools?.ytdlp && st.step !== 'yt-dlp' && !shown) return
+    shown = true
+    $('#setupScreen').hidden = false
+    $('#setupStep').textContent = t(SETUP_STEPS[st.step] ?? 'Getting things ready…')
+    $('#setupBar').style.width = `${st.pct ?? 0}%`
+    $('#setupError').hidden = st.stage !== 'error'
+    if (st.stage === 'error') $('#setupErrorText').textContent = st.error
+    await sleep(500)
+  }
+}
+
 /* ---------------- offline ---------------- */
 // Shown when the frame says it is offline or a request fails for network reasons, and only once
 // the worker confirms YouTube is unreachable. Clears itself when the connection comes back.
@@ -2606,6 +2704,12 @@ document.addEventListener('click', (e) => {
     }
     case 'plRefresh':
       return void renderPlaylists($('#v-library'), LIB_TABS(), true)
+    case 'retrySetup':
+      return void callRaw('tube.retrySetup')
+    case 'updateSelf':
+      return void updateSelf()
+    case 'checkUpdates':
+      return void checkUpdates()
     case 'retryOnline': {
       t.disabled = true
       return void checkOnline().finally(() => {
@@ -2616,7 +2720,7 @@ document.addEventListener('click', (e) => {
     case 'download':
       return void (S.watch && download(S.watch))
     case 'copyLink':
-      return void copyText(`https://youtu.be/${S.watch.id}`).then((ok) => toast(ok ? 'Link copied' : 'Could not copy the link'))
+      return void copyText(`https://youtu.be/${S.watch.id}`).then((ok) => toast(ok ? 'Link copied' : 'Could not copy the link', ok ? 'success' : 'error'))
     case 'save':
       S.saved = isSaved(S.watch.id) ? S.saved.filter((v) => v.id !== S.watch.id) : remember(S.saved, S.watch, 500)
       store.set('saved', S.saved)
@@ -3054,8 +3158,9 @@ syncPlayButtons()
     if (id && id !== S.watch?.id) return void openWatch({ id }, { startAt: t ?? 0 })
     if (t != null) video.currentTime = t
   })
+  await waitForSetup()
   const st = await call('tube.status')
   S.ytdlp = st.ytdlp
   show('home')
-  if (!st.ytdlp) toast('yt-dlp was not found on this machine')
+  void noticeNewVersion()
 })()

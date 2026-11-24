@@ -138,3 +138,7 @@ video::cue { background: rgba(0,0,0,.72); color: #fff; font-size: 15px; line-hei
 .eq i { transform-origin: bottom; }
 .lofi-pills > button { flex-shrink: 0; padding: 7px 11px; gap: 6px; border-radius: 12px; }
 .lofi-pills svg { width: 15px; height: 15px; }
+/* notices */
+.toast { animation: toast-in .22s cubic-bezier(.2,.9,.3,1.2); transition: opacity .2s, transform .2s; }
+.toast.out { opacity: 0; transform: translateX(12px); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }

@@ -1,11 +1,12 @@
 // Tube worker: answers the panel. Lists come from yt-dlp (JSON only); images and video bytes are
 // fetched here and handed over as base64, because the panel's frame may only load data:/blob:.
-import { spawn } from 'node:child_process'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { isAbsolute, relative, resolve } from 'node:path'
 import * as https from 'node:https'
 import type { OrcaWorkerApi } from 'orca/worker'
 import * as auth from './auth'
+import { copyText, downloadsDir, reveal } from './platform'
+import * as tools from './tools'
+import { updateTube } from './update'
 import { chatPoll, chatStart } from './chat'
 import { channel, channelAvatar, comments, downloadState, playlistVideos, startDownload, type Caption, parseJson3, pickCaptions, type ChannelTab, feed, type Feed, pickFormats, search, type SearchOpts, type Track, type Watch, ytdlp, YTDLP, thumbOf } from './yt'
 
@@ -225,7 +226,27 @@ export default function activate(orca: OrcaWorkerApi): void {
       req.end()
     })
   )
-  handle('tube.status', async () => ({ ytdlp: YTDLP ?? null, signedIn: auth.signedIn() }))
+  // first start: install yt-dlp, a JS runtime and ffmpeg into Tube's folder (see tools.ts)
+  void tools.ensureTools((m) => orca.log(m))
+  handle('tube.status', async () => ({ ytdlp: YTDLP(), signedIn: auth.signedIn() }))
+  /** Setup progress (first start, or an update) and what is installed. */
+  handle('tube.setup', async () => ({ setup: tools.setup, tools: tools.toolInfo() }))
+  handle('tube.retrySetup', async () => {
+    tools.setup.stage = 'working'
+    tools.setup.error = ''
+    void tools.ensureTools((m) => orca.log(m))
+    return { ok: true }
+  })
+  // once per start: is there a newer Tube? (the panel asks for the answer when it opens)
+  const startupCheck = tools.latestTube().catch(() => '')
+  handle('tube.startupLatest', async () => ({ tube: await startupCheck }))
+  handle('tube.latest', async () => ({ tube: await tools.latestTube().catch(() => '') }))
+  /** Updates Tube itself through Orca (keeps its approval when no new access is asked). */
+  handle('tube.updateSelf', async () => {
+    const r = await updateTube()
+    orca.log(`self-update: ${JSON.stringify(r)}`)
+    return r
+  })
 
   /* ---- account ---- */
   const forget = () => {
@@ -458,7 +479,7 @@ export default function activate(orca: OrcaWorkerApi): void {
 
   handle('tube.download', async ({ id, maxHeight }: { id: string; maxHeight?: number }) => {
     try {
-      return { download: startDownload(id, maxHeight ?? 1080) }
+      return { download: await startDownload(id, maxHeight ?? 1080) }
     } catch (e) {
       return fail(e)
     }
@@ -530,22 +551,19 @@ export default function activate(orca: OrcaWorkerApi): void {
     return { avatars: out }
   })
   handle('tube.downloadState', async ({ id }: { id: string }) => ({ download: downloadState(id) }))
-  /** Shows a downloaded file in Finder. */
+  /** Shows a downloaded file in Finder / Explorer / the file manager. */
   handle('tube.reveal', async ({ file }: { file: string }) => {
-    if (!file.startsWith(join(homedir(), 'Downloads'))) return { error: 'not a Tube download' }
-    spawn('open', ['-R', file], { stdio: 'ignore' }).on('error', () => {})
+    // only files inside the Downloads folder (compared as paths, so separators and case on Windows are right)
+    const rel = relative(downloadsDir(), resolve(file))
+    if (!rel || rel.startsWith('..') || isAbsolute(rel)) return { error: 'not a Tube download' }
+    reveal(resolve(file))
     return { ok: true }
   })
 
   /** Copies text to the clipboard (the panel frame may not be allowed to). */
   handle('tube.copy', async ({ text }: { text: string }) => {
     try {
-      await new Promise<void>((ok, no) => {
-        const p = spawn('pbcopy', [], { stdio: ['pipe', 'ignore', 'ignore'] })
-        p.on('error', no)
-        p.on('close', (code) => (code === 0 ? ok() : no(new Error(`pbcopy ${code}`))))
-        p.stdin.end(String(text))
-      })
+      await copyText(String(text))
       return { ok: true }
     } catch (e) {
       return fail(e)

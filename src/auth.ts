@@ -4,27 +4,23 @@
 //
 // "Sign in with Google" opens a separate Chrome profile with the DevTools port on, waits for the
 // login cookies to appear, reads them over CDP (no keychain prompt) and closes that window.
-import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
+import { spawn, type ChildProcess } from 'node:child_process'
 import type { Video } from './shapes'
 import { createHash } from 'node:crypto'
 import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
-import { homedir, tmpdir } from 'node:os'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { anyBrowserExe, browsers, DATA_DIR, isWin, openBrowserProfile } from './platform'
 
-export const DATA_DIR = join(homedir(), 'Library/Application Support/orca-tube')
+export { DATA_DIR }
 export const COOKIES = join(DATA_DIR, 'cookies.txt')
 const PROFILE = join(DATA_DIR, 'chrome-profile')
 const ORIGIN = 'https://www.youtube.com'
 const CLIENT_VERSION = '2.20251120.01.00'
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
 
-const CHROMES = [
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/Applications/Chromium.app/Contents/MacOS/Chromium',
-  '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
-  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-  '/Applications/Vivaldi.app/Contents/MacOS/Vivaldi'
-]
+/** PID of the sign-in browser, so a restarted worker can close the one it left behind. */
+const LOGIN_PID = join(DATA_DIR, 'login.pid')
 
 export type Account = { name: string; handle: string; avatar: string; channelId: string }
 
@@ -323,14 +319,23 @@ function toNetscape(cookies: any[]): string {
 
 /** Cookie names in the profile's cookie DB (names are plain text; values stay encrypted). */
 function cookieNames(): Set<string> {
-  const db = [join(PROFILE, 'Default/Cookies'), join(PROFILE, 'Default/Network/Cookies')].find((p) => existsSync(p))
+  const db = [join(PROFILE, 'Default', 'Cookies'), join(PROFILE, 'Default', 'Network', 'Cookies')].find((p) => existsSync(p))
   if (!db) return new Set()
   // Chrome keeps the DB open; read a copy.
   const copy = join(tmpdir(), `orca-tube-cookies-${process.pid}.db`)
   try {
     copyFileSync(db, copy)
-    const out = execFileSync('/usr/bin/sqlite3', [copy, "SELECT name FROM cookies WHERE host_key LIKE '%youtube.com'"], { encoding: 'utf8', timeout: 5000 })
-    return new Set(out.split('\n').filter(Boolean))
+    try {
+      const { DatabaseSync } = require('node:sqlite') as typeof import('node:sqlite')
+      const d = new DatabaseSync(copy)
+      const rows = d.prepare("SELECT name FROM cookies WHERE host_key LIKE '%youtube.com'").all() as { name: string }[]
+      d.close()
+      return new Set(rows.map((r) => r.name))
+    } catch {
+      // no node:sqlite: cookie names are stored as plain text, so look for the ones that matter
+      const raw = readFileSync(copy).toString('latin1')
+      return new Set(['SAPISID', '__Secure-3PAPISID', 'LOGIN_INFO'].filter((n) => raw.includes(n)))
+    }
   } catch {
     return new Set()
   } finally {
@@ -348,17 +353,23 @@ function waitExit(proc: ChildProcess, ms: number) {
 }
 
 /** A sign-in window left behind by an earlier worker (a reload drops our handle to it). */
-function closeStale() {
+async function closeStale() {
+  let pid = 0
   try {
-    execFileSync('/usr/bin/pkill', ['-TERM', '-f', `user-data-dir=${PROFILE}`])
-    execFileSync('/bin/sleep', ['1.5'])
-  } catch {} // pkill exits 1 when nothing matched
+    pid = Number(readFileSync(LOGIN_PID, 'utf8'))
+  } catch {}
+  rmSync(LOGIN_PID, { force: true })
+  if (!pid) return
+  try {
+    process.kill(pid, isWin ? undefined : 'SIGTERM')
+    await sleep(1500)
+  } catch {} // already gone
 }
 
 /** Starts the profile headless with DevTools on and reads its cookies (Chrome decrypts them itself). */
 async function readProfileCookies(chrome: string): Promise<any[]> {
   rmSync(join(PROFILE, 'DevToolsActivePort'), { force: true })
-  const proc = spawn(chrome, [`--user-data-dir=${PROFILE}`, '--headless=new', '--remote-debugging-port=0', '--no-first-run', 'about:blank'], { stdio: 'ignore' })
+  const proc = spawn(chrome, [`--user-data-dir=${PROFILE}`, '--headless=new', '--remote-debugging-port=0', '--no-first-run', 'about:blank'], { stdio: 'ignore', windowsHide: true })
   try {
     for (let i = 0; i < 40; i++) {
       await sleep(250)
@@ -381,11 +392,10 @@ async function readProfileCookies(chrome: string): Promise<any[]> {
  */
 export function beginLogin(log?: (m: string) => void): Promise<Account> {
   if (login) return login.done
-  const chrome = CHROMES.find((p) => existsSync(p))
-  if (!chrome) return Promise.reject(new Error('Chrome, Brave, Edge or Vivaldi is needed for the sign-in window'))
+  const chrome = anyBrowserExe()
+  if (!chrome) return Promise.reject(new Error('Chrome, Brave, Edge, Vivaldi or Chromium is needed for the sign-in window'))
   if (!(globalThis as any).WebSocket) return Promise.reject(new Error('This Orca has no WebSocket in workers; use a browser sign-in below'))
   ensureDir()
-  closeStale()
   const proc = spawn(
     chrome,
     [
@@ -397,8 +407,9 @@ export function beginLogin(log?: (m: string) => void): Promise<Account> {
     ],
     { stdio: 'ignore' }
   )
+  if (proc.pid) writeFileSync(LOGIN_PID, String(proc.pid))
   let exited = false
-  proc.on('exit', () => (exited = true))
+  proc.on('exit', () => ((exited = true), rmSync(LOGIN_PID, { force: true })))
   const done = (async () => {
     try {
       const deadline = Date.now() + 15 * 60_000
@@ -428,27 +439,20 @@ export function beginLogin(log?: (m: string) => void): Promise<Account> {
 export function cancelLogin() {
   login?.proc.kill()
   login = null
-  closeStale()
+  void closeStale()
 }
 
 /* ---------------- existing browser profiles ---------------- */
 
-const SUPPORT = join(homedir(), 'Library/Application Support')
-const CHROMIUMS: [id: string, label: string, dir: string, app: string][] = [
-  ['chrome', 'Chrome', 'Google/Chrome', 'Google Chrome'],
-  ['brave', 'Brave', 'BraveSoftware/Brave-Browser', 'Brave Browser'],
-  ['edge', 'Edge', 'Microsoft Edge', 'Microsoft Edge'],
-  ['vivaldi', 'Vivaldi', 'Vivaldi', 'Vivaldi']
-]
 export type BrowserProfile = { browser: string; label: string; profile: string; name: string; email: string; picture: string; active: number }
 
 /** Profiles of installed Chromium browsers, most recently used first (from each Local State). */
 export function browserProfiles(): BrowserProfile[] {
   const out: BrowserProfile[] = []
-  for (const [browser, label, dir] of CHROMIUMS) {
+  for (const { id: browser, label, userData } of browsers()) {
     let state: any
     try {
-      state = JSON.parse(readFileSync(join(SUPPORT, dir, 'Local State'), 'utf8'))
+      state = JSON.parse(readFileSync(join(userData, 'Local State'), 'utf8'))
     } catch {
       continue
     }
@@ -478,8 +482,8 @@ export const lastSource = (): Source | null => {
 }
 
 /**
- * Copies a browser profile's YouTube login through yt-dlp. Chromium browsers keep cookies
- * encrypted with a keychain key, so macOS asks once (choose "Always Allow").
+ * Copies a browser profile's YouTube login through yt-dlp, which decrypts Chromium's cookies the
+ * OS's way (macOS keychain — it asks once, choose "Always Allow"; Windows DPAPI; Linux keyring).
  */
 export async function importFromBrowser(run: (args: string[]) => Promise<any>, source: Source) {
   ensureDir()
@@ -502,12 +506,9 @@ export async function importFromBrowser(run: (args: string[]) => Promise<any>, s
 
 /** Opens youtube.com in that browser profile, for a profile that is not signed in to YouTube yet. */
 export function openInProfile(source: Source) {
-  const app = CHROMIUMS.find(([id]) => id === source.browser)?.[3]
-  if (!app) throw new Error('Unknown browser')
-  spawn('/usr/bin/open', ['-na', app, '--args', ...(source.profile ? [`--profile-directory=${source.profile}`] : []), 'https://www.youtube.com/'], {
-    stdio: 'ignore',
-    detached: true
-  }).unref()
+  const b = browsers().find((x) => x.id === source.browser)
+  if (!b) throw new Error('Unknown browser')
+  openBrowserProfile(b, source.profile, 'https://www.youtube.com/')
 }
 
 export function signOut() {

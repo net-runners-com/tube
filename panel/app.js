@@ -226,6 +226,42 @@ var ja_default = {
   "Clear watch history (this device)": "\u8996\u8074\u5C65\u6B74\u3092\u6D88\u53BB\uFF08\u3053\u306E\u7AEF\u672B\uFF09",
   "{n} searches": "{n} \u4EF6",
   Version: "\u30D0\u30FC\u30B8\u30E7\u30F3",
+  Updates: "\u30A2\u30C3\u30D7\u30C7\u30FC\u30C8",
+  "Check for updates": "\u30A2\u30C3\u30D7\u30C7\u30FC\u30C8\u3092\u78BA\u8A8D",
+  "Tube {v} is available": "Tube {v} \u304C\u3042\u308A\u307E\u3059",
+  "Tube is up to date": "Tube \u306F\u6700\u65B0\u3067\u3059",
+  Update: "\u66F4\u65B0",
+  "Not checked yet": "\u672A\u78BA\u8A8D",
+  "Up to date": "\u6700\u65B0\u3067\u3059",
+  "up to date": "\u6700\u65B0",
+  "{v} is available": "{v} \u304C\u3042\u308A\u307E\u3059",
+  "Video tools": "\u52D5\u753B\u30C4\u30FC\u30EB",
+  "Updating Tube\u2026": "Tube \u3092\u66F4\u65B0\u4E2D\u2026",
+  "Tube updated to {v}": "Tube \u3092 {v} \u306B\u66F4\u65B0\u3057\u307E\u3057\u305F",
+  "Update failed": "\u66F4\u65B0\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F",
+  "This version asks for new access. Update it in Orca: Settings \u25B8 Plugins.": "\u3053\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\u306F\u65B0\u3057\u3044\u6A29\u9650\u304C\u5FC5\u8981\u3067\u3059\u3002Orca \u306E \u8A2D\u5B9A \u25B8 \u30D7\u30E9\u30B0\u30A4\u30F3 \u304B\u3089\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+  "Tube {v} is available \u2014 update it in Settings \u25B8 Updates": "Tube {v} \u304C\u51FA\u3066\u3044\u307E\u3059\u3002\u8A2D\u5B9A \u25B8 \u30A2\u30C3\u30D7\u30C7\u30FC\u30C8 \u304B\u3089\u66F4\u65B0\u3067\u304D\u307E\u3059",
+  "Checking\u2026": "\u78BA\u8A8D\u4E2D\u2026",
+  "Update now": "\u4ECA\u3059\u3050\u66F4\u65B0",
+  "Updating\u2026": "\u66F4\u65B0\u4E2D\u2026",
+  Install: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB",
+  Reinstall: "\u5165\u308C\u76F4\u3059",
+  Installed: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u6E08\u307F",
+  "Not installed": "\u672A\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB",
+  "Update yt-dlp automatically": "yt-dlp \u3092\u81EA\u52D5\u3067\u66F4\u65B0",
+  "Automatic updates on": "\u81EA\u52D5\u66F4\u65B0: \u30AA\u30F3",
+  "Automatic updates off": "\u81EA\u52D5\u66F4\u65B0: \u30AA\u30D5",
+  "Update it in Orca:": "Orca \u3067\u66F4\u65B0:",
+  "Settings \u25B8 Plugins": "\u8A2D\u5B9A \u25B8 \u30D7\u30E9\u30B0\u30A4\u30F3",
+  "A new Tube is available": "\u65B0\u3057\u3044 Tube \u304C\u3042\u308A\u307E\u3059",
+  "Everything is up to date": "\u3059\u3079\u3066\u6700\u65B0\u3067\u3059",
+  "{tool} updated": "{tool} \u3092\u66F4\u65B0\u3057\u307E\u3057\u305F",
+  "Setting up Tube": "Tube \u3092\u6E96\u5099\u3057\u3066\u3044\u307E\u3059",
+  "Getting things ready\u2026": "\u6E96\u5099\u4E2D\u2026",
+  "Downloading the video engine (yt-dlp)\u2026": "\u52D5\u753B\u30A8\u30F3\u30B8\u30F3\uFF08yt-dlp\uFF09\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u4E2D\u2026",
+  "Preparing the player helper\u2026": "\u518D\u751F\u306E\u88DC\u52A9\u30C4\u30FC\u30EB\u3092\u6E96\u5099\u4E2D\u2026",
+  "Downloading ffmpeg for downloads\u2026": "\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u7528\u306E ffmpeg \u3092\u53D6\u5F97\u4E2D\u2026",
+  "Only the first time: Tube downloads the video tools it needs. Nothing to install yourself.": "\u521D\u56DE\u3060\u3051\u3001\u5FC5\u8981\u306A\u52D5\u753B\u30C4\u30FC\u30EB\u3092\u81EA\u52D5\u3067\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u307E\u3059\u3002\u81EA\u5206\u3067\u5165\u308C\u308B\u3082\u306E\u306F\u3042\u308A\u307E\u305B\u3093\u3002",
   Author: "\u4F5C\u8005",
   Language: "\u8A00\u8A9E",
   "Auto (system)": "\u81EA\u52D5\uFF08\u30B7\u30B9\u30C6\u30E0\uFF09",
@@ -1004,13 +1040,23 @@ async function copyText(text) {
   const r = await call("tube.copy", { text });
   return !r.error;
 }
-var toastTimer;
-function toast(text) {
-  const t2 = $("#toast");
-  t2.textContent = text;
-  t2.style.opacity = "1";
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t2.style.opacity = "0", 2200);
+function toast(text, kind = "info") {
+  const box = $("#toasts");
+  const el = document.createElement("div");
+  el.className = "toast pointer-events-auto flex w-full items-start gap-2.5 rounded-[14px] border border-white/10 bg-[#2a2a2a]/95 py-2.5 pl-3.5 pr-2 text-[12.5px] leading-snug shadow-[0_10px_30px_rgba(0,0,0,.45)] backdrop-blur";
+  const icon = kind === "success" ? '<span class="mt-[1px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[#22a35a] text-white"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>' : kind === "error" ? '<span class="mt-[1px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-brand text-[12px] font-bold text-white">!</span>' : "";
+  el.innerHTML = `${icon}<span class="min-w-0 flex-1 break-words pt-[1px]"></span><button class="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[#aaa] hover:bg-white/10 hover:text-white" aria-label="Close">${I.close(13)}</button>`;
+  el.querySelector("span.flex-1").textContent = text;
+  const close = () => {
+    el.classList.add("out");
+    setTimeout(() => el.remove(), 200);
+  };
+  el.querySelector("button").onclick = (e) => (e.stopPropagation(), close());
+  let timer = setTimeout(close, 4500);
+  el.onmouseenter = () => clearTimeout(timer);
+  el.onmouseleave = () => timer = setTimeout(close, 2500);
+  box.prepend(el);
+  while (box.childElementCount > 4) box.lastElementChild.remove();
 }
 var errorBox = (msg, retry) => `<div class="mx-5 my-10 rounded-2xl bg-panel p-5 text-center text-[12.5px] text-[#ccc]"><p>${esc(msg)}</p>${retry ? `<button data-act="${retry}" class="mt-4 rounded-xl bg-brand px-4 py-2 text-[12px] font-bold text-white">Retry</button>` : ""}</div>`;
 var SK = {
@@ -1347,6 +1393,7 @@ document.querySelector('#nav').style.opacity = '.8'" class="mt-3 h-40 w-full res
          <label class="mt-3 flex items-center gap-2.5 text-[12.5px]"><input type="checkbox" data-act="toggleScriptAuto" ${S.script.auto ? "checked" : ""} class="h-4 w-4 accent-[rgb(var(--brand))]">Run automatically when Tube opens</label>
        </div>`
   )}
+    ${card("Updates", `<div id="updatesCard">${updatesHtml()}</div>`)}
     ${card(
     "About",
     line("Version", ABOUT.version) + line("Author", esc(ABOUT.author)) + line("GitHub", esc(ABOUT.repo.replace("https://", "")), `data-open-url="${esc(ABOUT.repo)}"`)
@@ -1465,7 +1512,7 @@ function dlButton(w) {
   const d = dls.get(w.id);
   const label = !d ? "Download" : d.error ? "Retry" : d.done ? "Show file" : `${d.pct}%`;
   const icon = d?.done ? I.done() : I.download();
-  return `<button data-act="download" id="dlBtn" class="flex min-w-0 flex-col items-center gap-1.5 ${d?.done ? "text-brand" : ""}"><span class="${d?.done ? "" : "text-white"}">${icon}</span><span class="tabular-nums">${label}</span></button>`;
+  return `<button data-act="download" id="dlBtn" class="flex min-w-0 flex-col items-center gap-1.5 ${d?.done ? "text-[#2fbf71]" : ""}"><span class="${d?.done ? "" : "text-white"}">${icon}</span><span class="tabular-nums">${label}</span></button>`;
 }
 function syncDl(id) {
   const b = $("#dlBtn");
@@ -1485,8 +1532,8 @@ async function download(w) {
     if (!s2) return;
     dls.set(w.id, s2);
     syncDl(w.id);
-    if (s2.error) return toast(`Download failed: ${s2.error}`);
-    if (s2.done) return toast(`Saved: ${s2.file.split("/").pop()}`);
+    if (s2.error) return toast(`Download failed: ${s2.error}`, "error");
+    if (s2.done) return toast(`Saved: ${s2.file.split(/[\\/]/).pop()}`, "success");
     setTimeout(poll, 1e3);
   };
   setTimeout(poll, 800);
@@ -2556,6 +2603,77 @@ ${code2}
   document.body.append(el);
   el.remove();
 }
+var upd = {};
+var newer = (a, b) => {
+  const pa = a.replace(/^v/, "").split(/[.-]/).map(Number);
+  const pb = b.replace(/^v/, "").split(/[.-]/).map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
+  return false;
+};
+function updatesHtml() {
+  const L = upd.latest;
+  const isNew = !!L && newer(L, ABOUT.version);
+  const status = L === void 0 ? t("Not checked yet") : isNew ? t("{v} is available", { v: esc(L.replace(/^v/, "")) }) : t("Up to date");
+  const btn = isNew ? `<button data-act="updateSelf" class="shrink-0 rounded-full bg-brand px-4 py-1.5 text-[12px] font-bold text-white disabled:opacity-50" ${upd.busy ? "disabled" : ""}>${upd.busy ? t("Updating\u2026") : t("Update")}</button>` : `<button data-act="checkUpdates" class="shrink-0 rounded-full border border-line px-4 py-1.5 text-[12px] hover:bg-white/5 disabled:opacity-50" ${upd.checking ? "disabled" : ""}>${upd.checking ? t("Checking\u2026") : t("Check for updates")}</button>`;
+  return `<div class="flex items-center gap-3 px-4 py-4">
+      <span class="grid h-[30px] w-[40px] shrink-0 place-items-center rounded-[8px] bg-brand text-white">${I.tube(22)}</span>
+      <span class="min-w-0 flex-1"><span class="block text-[13.5px] font-medium">Tube ${ABOUT.version}</span><span class="mt-0.5 block text-[11.5px] ${isNew ? "text-[#2fbf71]" : "text-mute"}">${status}</span></span>
+      ${btn}
+    </div>${upd.error ? `<p class="px-4 pb-3 text-[11.5px] leading-relaxed text-[#ffb4b4]">${esc(upd.error)}</p>` : ""}`;
+}
+function syncUpdates() {
+  const box = $("#updatesCard");
+  if (box) box.innerHTML = updatesHtml();
+}
+async function checkUpdates() {
+  upd.checking = true;
+  syncUpdates();
+  const r = await call("tube.latest");
+  upd.checking = false;
+  upd.latest = r.tube ?? "";
+  syncUpdates();
+  const isNew = !!upd.latest && newer(upd.latest, ABOUT.version);
+  toast(isNew ? t("Tube {v} is available", { v: upd.latest.replace(/^v/, "") }) : t("Tube is up to date"), isNew ? "info" : "success");
+}
+async function updateSelf() {
+  upd.busy = true;
+  upd.error = "";
+  syncUpdates();
+  toast(t("Updating Tube\u2026"));
+  const r = await call("tube.updateSelf", {}, 24e4);
+  upd.busy = false;
+  if (r?.ok) toast(t("Tube updated to {v}", { v: r.version || "" }), "success");
+  else {
+    upd.error = r?.needsApproval ? t("This version asks for new access. Update it in Orca: Settings \u25B8 Plugins.") : r?.error || t("Update failed");
+    toast(upd.error, "error");
+  }
+  syncUpdates();
+}
+async function noticeNewVersion() {
+  const r = await call("tube.startupLatest");
+  if (!r.tube) return;
+  upd.latest = r.tube;
+  if (newer(r.tube, ABOUT.version)) toast(t("Tube {v} is available \u2014 update it in Settings \u25B8 Updates", { v: r.tube.replace(/^v/, "") }));
+}
+var SETUP_STEPS = { "yt-dlp": "Downloading the video engine (yt-dlp)\u2026", node: "Preparing the player helper\u2026", ffmpeg: "Downloading ffmpeg for downloads\u2026" };
+async function waitForSetup() {
+  for (let shown = false; ; ) {
+    const r = await callRaw("tube.setup");
+    const st = r?.setup;
+    if (!st || st.stage === "ready" && r.tools?.ytdlp) {
+      $("#setupScreen").hidden = true;
+      return;
+    }
+    if (st.stage === "working" && r.tools?.ytdlp && st.step !== "yt-dlp" && !shown) return;
+    shown = true;
+    $("#setupScreen").hidden = false;
+    $("#setupStep").textContent = t(SETUP_STEPS[st.step] ?? "Getting things ready\u2026");
+    $("#setupBar").style.width = `${st.pct ?? 0}%`;
+    $("#setupError").hidden = st.stage !== "error";
+    if (st.stage === "error") $("#setupErrorText").textContent = st.error;
+    await sleep(500);
+  }
+}
 var offline = false;
 var checking = null;
 function setOffline(on) {
@@ -3164,6 +3282,12 @@ document.addEventListener("click", (e) => {
     }
     case "plRefresh":
       return void renderPlaylists($("#v-library"), LIB_TABS(), true);
+    case "retrySetup":
+      return void callRaw("tube.retrySetup");
+    case "updateSelf":
+      return void updateSelf();
+    case "checkUpdates":
+      return void checkUpdates();
     case "retryOnline": {
       t2.disabled = true;
       return void checkOnline().finally(() => {
@@ -3174,7 +3298,7 @@ document.addEventListener("click", (e) => {
     case "download":
       return void (S.watch && download(S.watch));
     case "copyLink":
-      return void copyText(`https://youtu.be/${S.watch.id}`).then((ok) => toast(ok ? "Link copied" : "Could not copy the link"));
+      return void copyText(`https://youtu.be/${S.watch.id}`).then((ok) => toast(ok ? "Link copied" : "Could not copy the link", ok ? "success" : "error"));
     case "save":
       S.saved = isSaved(S.watch.id) ? S.saved.filter((v) => v.id !== S.watch.id) : remember(S.saved, S.watch, 500);
       store.set("saved", S.saved);
@@ -3580,8 +3704,9 @@ syncPlayButtons();
     if (id && id !== S.watch?.id) return void openWatch({ id }, { startAt: t2 ?? 0 });
     if (t2 != null) video.currentTime = t2;
   });
+  await waitForSetup();
   const st = await call("tube.status");
   S.ytdlp = st.ytdlp;
   show("home");
-  if (!st.ytdlp) toast("yt-dlp was not found on this machine");
+  void noticeNewVersion();
 })();
