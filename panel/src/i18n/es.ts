@@ -327,4 +327,8 @@ export default {
   'Download template': 'Descargar plantilla',
   'Template saved': 'Plantilla guardada',
   'Template added to the editor': 'Plantilla añadida al editor',
+  'Support Tube': 'Apoya a Tube',
+  'Star on GitHub': 'Estrella en GitHub',
+  'Buy me a coffee': 'Invítame a un café',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Si Tube te sirve, una estrella o un café lo mantienen vivo.',
 }

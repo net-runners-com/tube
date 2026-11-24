@@ -10,6 +10,7 @@ Watch, listen and browse without leaving your workspace.
 [![Version](https://img.shields.io/github/v/tag/net-runners-com/tube?label=version&color=e3262b)](https://github.com/net-runners-com/tube/tags)
 [![Orca plugin](https://img.shields.io/badge/Orca-plugin-1c1c1c)](https://orca.dev/plugins/net-runners-com/tube)
 [![License: MIT](https://img.shields.io/badge/license-MIT-444)](LICENSE)
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?logo=buymeacoffee&logoColor=000)](https://buymeacoffee.com/hiroto.netrunners)
 
 <img src="assets/cover.jpg" alt="Tube in Orca: Home, Lofi mode and Shorts" width="100%">
 
@@ -113,6 +114,14 @@ with each Tube version.
 
 Tube talks to YouTube directly from your computer. Your sign-in stays on your machine, in Tube's
 own storage; nothing is sent anywhere else.
+
+## Support Tube
+
+If Tube helps you, **[star the repository](https://github.com/net-runners-com/tube)** ⭐ or
+**[buy me a coffee](https://buymeacoffee.com/hiroto.netrunners)** ☕ — both keep it going.
+You'll find the same two buttons in Tube's Settings.
+
+<a href="https://buymeacoffee.com/hiroto.netrunners"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=000" alt="Buy me a coffee"></a>
 
 ## License
 

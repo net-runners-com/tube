@@ -327,4 +327,8 @@ export default {
   'Download template': '下載範本',
   'Template saved': '範本已儲存',
   'Template added to the editor': '已將範本放入編輯器',
+  'Support Tube': '支持 Tube',
+  'Star on GitHub': '在 GitHub 上加星',
+  'Buy me a coffee': '請我喝杯咖啡',
+  'If Tube helps you, a star or a coffee keeps it going.': '如果 Tube 對你有幫助，給顆星或請杯咖啡支持一下吧。',
 }

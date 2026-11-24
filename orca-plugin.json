@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "tube",
   "name": "Tube",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": "MIT",
   "description": "YouTube in Orca's sidebar: browse, search and watch videos, Shorts and live streams, with a Lofi music-player mode, captions, playlists and your account. Works out of the box on macOS, Windows and Linux.",
   "icon": "assets/icon.png",

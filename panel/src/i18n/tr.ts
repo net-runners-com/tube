@@ -326,5 +326,9 @@ export default {
   'Script error: {why}': 'Betik hatası: {why}',
   'Download template': 'Şablonu indir',
   'Template saved': 'Şablon kaydedildi',
-  'Template added to the editor': 'Şablon düzenleyiciye eklendi'
+  'Template added to the editor': 'Şablon düzenleyiciye eklendi',
+  'Support Tube': 'Tube\'u destekle',
+  'Star on GitHub': 'GitHub\'da yıldızla',
+  'Buy me a coffee': 'Bana bir kahve ısmarla',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Tube işine yarıyorsa bir yıldız ya da kahve onu ayakta tutar.',
 }

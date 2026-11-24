@@ -576,7 +576,7 @@ async function renderChannel() {
 }
 
 /** Shown in Settings ▸ About (keep in step with orca-plugin.json). */
-const ABOUT = { version: '1.1.1', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube' }
+const ABOUT = { version: '1.1.2', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube', coffee: 'https://buymeacoffee.com/hiroto.netrunners' }
 const LIB_TABS = () =>
   S.account
     ? [['history', 'History'], ['playlists', 'Playlists'], ['watchlater', 'Watch later'], ['liked', 'Liked'], ['saved', 'Saved']]
@@ -687,6 +687,16 @@ function renderSettings() {
          <textarea id="scriptCode" data-draft="script" spellcheck="false" placeholder="// runs in the Tube panel, e.g.\ndocument.querySelector('#nav').style.opacity = '.8'" class="mt-3 h-40 w-full resize-y rounded-[12px] border border-white/10 bg-black/30 p-3 font-mono text-[11.5px] leading-relaxed outline-none focus:border-brand">${esc(S.drafts.script ?? S.script.code)}</textarea>
          <div class="mt-2 flex flex-wrap gap-2"><button data-act="saveScript" class="rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button><button data-act="runScript" class="rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">Run now</button><button data-act="templateScript" class="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">${I.download(14)}<span>Download template</span></button></div>
          <label class="mt-3 flex items-center gap-2.5 text-[12.5px]"><input type="checkbox" data-act="toggleScriptAuto" ${S.script.auto ? 'checked' : ''} class="h-4 w-4 accent-[rgb(var(--brand))]">Run automatically when Tube opens</label>
+       </div>`
+    )}
+    ${card(
+      'Support Tube',
+      `<div class="px-4 py-4">
+         <p class="text-[12.5px] leading-relaxed text-mute">If Tube helps you, a star or a coffee keeps it going.</p>
+         <div class="mt-3 grid grid-cols-2 gap-2">
+           <button data-open-url="${esc(ABOUT.repo)}" class="flex items-center justify-center gap-2 rounded-[12px] border border-line py-2.5 text-[12.5px] font-medium hover:bg-white/5">${svg('<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>', { size: 16, sw: 1.7 })}<span>Star on GitHub</span></button>
+           <button data-open-url="${esc(ABOUT.coffee)}" class="flex items-center justify-center gap-2 rounded-[12px] bg-[#ffdd00] py-2.5 text-[12.5px] font-bold text-black hover:brightness-95">${svg('<path d="M5 8h11v6a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v2M11 3v2M14 3v2"/>', { size: 16, sw: 1.8 })}<span>Buy me a coffee</span></button>
+         </div>
        </div>`
     )}
     ${card('Updates', `<div id="updatesCard">${updatesHtml()}</div>`)}

@@ -326,5 +326,9 @@ export default {
   'Script error: {why}': 'Skriptfehler: {why}',
   'Download template': 'Vorlage herunterladen',
   'Template saved': 'Vorlage gespeichert',
-  'Template added to the editor': 'Vorlage in den Editor eingefügt'
+  'Template added to the editor': 'Vorlage in den Editor eingefügt',
+  'Support Tube': 'Tube unterstützen',
+  'Star on GitHub': 'Stern auf GitHub',
+  'Buy me a coffee': 'Spendier mir einen Kaffee',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Wenn Tube dir hilft, halten ein Stern oder ein Kaffee es am Leben.',
 }

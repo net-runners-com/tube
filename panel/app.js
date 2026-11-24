@@ -316,7 +316,11 @@ var de_default = {
   "Script error: {why}": "Skriptfehler: {why}",
   "Download template": "Vorlage herunterladen",
   "Template saved": "Vorlage gespeichert",
-  "Template added to the editor": "Vorlage in den Editor eingef\xFCgt"
+  "Template added to the editor": "Vorlage in den Editor eingef\xFCgt",
+  "Support Tube": "Tube unterst\xFCtzen",
+  "Star on GitHub": "Stern auf GitHub",
+  "Buy me a coffee": "Spendier mir einen Kaffee",
+  "If Tube helps you, a star or a coffee keeps it going.": "Wenn Tube dir hilft, halten ein Stern oder ein Kaffee es am Leben."
 };
 
 // panel/src/i18n/en.ts
@@ -640,7 +644,11 @@ var es_default = {
   "Script error: {why}": "Error del script: {why}",
   "Download template": "Descargar plantilla",
   "Template saved": "Plantilla guardada",
-  "Template added to the editor": "Plantilla a\xF1adida al editor"
+  "Template added to the editor": "Plantilla a\xF1adida al editor",
+  "Support Tube": "Apoya a Tube",
+  "Star on GitHub": "Estrella en GitHub",
+  "Buy me a coffee": "Inv\xEDtame a un caf\xE9",
+  "If Tube helps you, a star or a coffee keeps it going.": "Si Tube te sirve, una estrella o un caf\xE9 lo mantienen vivo."
 };
 
 // panel/src/i18n/fr.ts
@@ -961,7 +969,11 @@ var fr_default = {
   "Script error: {why}": "Erreur du script : {why}",
   "Download template": "T\xE9l\xE9charger le mod\xE8le",
   "Template saved": "Mod\xE8le enregistr\xE9",
-  "Template added to the editor": "Mod\xE8le ajout\xE9 \xE0 l'\xE9diteur"
+  "Template added to the editor": "Mod\xE8le ajout\xE9 \xE0 l'\xE9diteur",
+  "Support Tube": "Soutenir Tube",
+  "Star on GitHub": "\xC9toile sur GitHub",
+  "Buy me a coffee": "Offrez-moi un caf\xE9",
+  "If Tube helps you, a star or a coffee keeps it going.": "Si Tube vous est utile, une \xE9toile ou un caf\xE9 aide \xE0 le faire vivre."
 };
 
 // panel/src/i18n/ja.ts
@@ -1282,7 +1294,11 @@ var ja_default = {
   "Script error: {why}": "\u30B9\u30AF\u30EA\u30D7\u30C8\u30A8\u30E9\u30FC: {why}",
   "Download template": "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9",
   "Template saved": "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u4FDD\u5B58\u3057\u307E\u3057\u305F",
-  "Template added to the editor": "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u30A8\u30C7\u30A3\u30BF\u306B\u5165\u308C\u307E\u3057\u305F"
+  "Template added to the editor": "\u30C6\u30F3\u30D7\u30EC\u30FC\u30C8\u3092\u30A8\u30C7\u30A3\u30BF\u306B\u5165\u308C\u307E\u3057\u305F",
+  "Support Tube": "Tube \u3092\u5FDC\u63F4",
+  "Star on GitHub": "GitHub \u3067\u30B9\u30BF\u30FC",
+  "Buy me a coffee": "\u30B3\u30FC\u30D2\u30FC\u3092\u304A\u3054\u308B",
+  "If Tube helps you, a star or a coffee keeps it going.": "Tube \u304C\u5F79\u306B\u7ACB\u3063\u305F\u3089\u3001\u30B9\u30BF\u30FC\u3084\u30B3\u30FC\u30D2\u30FC\u3067\u5FDC\u63F4\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
 };
 
 // panel/src/i18n/ko.ts
@@ -1603,7 +1619,11 @@ var ko_default = {
   "Script error: {why}": "\uC2A4\uD06C\uB9BD\uD2B8 \uC624\uB958: {why}",
   "Download template": "\uD15C\uD50C\uB9BF \uB2E4\uC6B4\uB85C\uB4DC",
   "Template saved": "\uD15C\uD50C\uB9BF\uC744 \uC800\uC7A5\uD588\uC2B5\uB2C8\uB2E4",
-  "Template added to the editor": "\uD15C\uD50C\uB9BF\uC744 \uD3B8\uC9D1\uAE30\uC5D0 \uB123\uC5C8\uC2B5\uB2C8\uB2E4"
+  "Template added to the editor": "\uD15C\uD50C\uB9BF\uC744 \uD3B8\uC9D1\uAE30\uC5D0 \uB123\uC5C8\uC2B5\uB2C8\uB2E4",
+  "Support Tube": "Tube \uC751\uC6D0\uD558\uAE30",
+  "Star on GitHub": "GitHub\uC5D0\uC11C \uC2A4\uD0C0",
+  "Buy me a coffee": "\uCEE4\uD53C \uD55C \uC794 \uC0AC\uC8FC\uAE30",
+  "If Tube helps you, a star or a coffee keeps it going.": "Tube\uAC00 \uB3C4\uC6C0\uC774 \uB410\uB2E4\uBA74 \uC2A4\uD0C0\uB098 \uCEE4\uD53C\uB85C \uC751\uC6D0\uD574 \uC8FC\uC138\uC694."
 };
 
 // panel/src/i18n/pt-BR.ts
@@ -1924,7 +1944,11 @@ var pt_BR_default = {
   "Script error: {why}": "Erro no script: {why}",
   "Download template": "Baixar modelo",
   "Template saved": "Modelo salvo",
-  "Template added to the editor": "Modelo adicionado ao editor"
+  "Template added to the editor": "Modelo adicionado ao editor",
+  "Support Tube": "Apoie o Tube",
+  "Star on GitHub": "Estrela no GitHub",
+  "Buy me a coffee": "Me pague um caf\xE9",
+  "If Tube helps you, a star or a coffee keeps it going.": "Se o Tube te ajuda, uma estrela ou um caf\xE9 mant\xE9m ele vivo."
 };
 
 // panel/src/i18n/ru.ts
@@ -2245,7 +2269,11 @@ var ru_default = {
   "Script error: {why}": "\u041E\u0448\u0438\u0431\u043A\u0430 \u0441\u043A\u0440\u0438\u043F\u0442\u0430: {why}",
   "Download template": "\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u0448\u0430\u0431\u043B\u043E\u043D",
   "Template saved": "\u0428\u0430\u0431\u043B\u043E\u043D \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D",
-  "Template added to the editor": "\u0428\u0430\u0431\u043B\u043E\u043D \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440"
+  "Template added to the editor": "\u0428\u0430\u0431\u043B\u043E\u043D \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D \u0432 \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440",
+  "Support Tube": "\u041F\u043E\u0434\u0434\u0435\u0440\u0436\u0430\u0442\u044C Tube",
+  "Star on GitHub": "\u0417\u0432\u0435\u0437\u0434\u0430 \u043D\u0430 GitHub",
+  "Buy me a coffee": "\u0423\u0433\u043E\u0441\u0442\u0438\u0442\u044C \u043A\u043E\u0444\u0435",
+  "If Tube helps you, a star or a coffee keeps it going.": "\u0415\u0441\u043B\u0438 Tube \u0432\u0430\u043C \u043F\u043E\u043B\u0435\u0437\u0435\u043D, \u0437\u0432\u0435\u0437\u0434\u0430 \u0438\u043B\u0438 \u043A\u043E\u0444\u0435 \u043F\u043E\u043C\u043E\u0433\u0443\u0442 \u0435\u0433\u043E \u0440\u0430\u0437\u0432\u0438\u0442\u0438\u044E."
 };
 
 // panel/src/i18n/tr.ts
@@ -2566,7 +2594,11 @@ var tr_default = {
   "Script error: {why}": "Betik hatas\u0131: {why}",
   "Download template": "\u015Eablonu indir",
   "Template saved": "\u015Eablon kaydedildi",
-  "Template added to the editor": "\u015Eablon d\xFCzenleyiciye eklendi"
+  "Template added to the editor": "\u015Eablon d\xFCzenleyiciye eklendi",
+  "Support Tube": "Tube'u destekle",
+  "Star on GitHub": "GitHub'da y\u0131ld\u0131zla",
+  "Buy me a coffee": "Bana bir kahve \u0131smarla",
+  "If Tube helps you, a star or a coffee keeps it going.": "Tube i\u015Fine yar\u0131yorsa bir y\u0131ld\u0131z ya da kahve onu ayakta tutar."
 };
 
 // panel/src/i18n/zh-CN.ts
@@ -2887,7 +2919,11 @@ var zh_CN_default = {
   "Script error: {why}": "\u811A\u672C\u9519\u8BEF\uFF1A{why}",
   "Download template": "\u4E0B\u8F7D\u6A21\u677F",
   "Template saved": "\u6A21\u677F\u5DF2\u4FDD\u5B58",
-  "Template added to the editor": "\u5DF2\u5C06\u6A21\u677F\u653E\u5165\u7F16\u8F91\u5668"
+  "Template added to the editor": "\u5DF2\u5C06\u6A21\u677F\u653E\u5165\u7F16\u8F91\u5668",
+  "Support Tube": "\u652F\u6301 Tube",
+  "Star on GitHub": "\u5728 GitHub \u4E0A\u52A0\u661F",
+  "Buy me a coffee": "\u8BF7\u6211\u559D\u676F\u5496\u5561",
+  "If Tube helps you, a star or a coffee keeps it going.": "\u5982\u679C Tube \u5BF9\u4F60\u6709\u5E2E\u52A9\uFF0C\u70B9\u4E2A\u661F\u6216\u8BF7\u676F\u5496\u5561\u652F\u6301\u4E00\u4E0B\u5427\u3002"
 };
 
 // panel/src/i18n/zh-TW.ts
@@ -3208,7 +3244,11 @@ var zh_TW_default = {
   "Script error: {why}": "\u6307\u4EE4\u78BC\u932F\u8AA4\uFF1A{why}",
   "Download template": "\u4E0B\u8F09\u7BC4\u672C",
   "Template saved": "\u7BC4\u672C\u5DF2\u5132\u5B58",
-  "Template added to the editor": "\u5DF2\u5C07\u7BC4\u672C\u653E\u5165\u7DE8\u8F2F\u5668"
+  "Template added to the editor": "\u5DF2\u5C07\u7BC4\u672C\u653E\u5165\u7DE8\u8F2F\u5668",
+  "Support Tube": "\u652F\u6301 Tube",
+  "Star on GitHub": "\u5728 GitHub \u4E0A\u52A0\u661F",
+  "Buy me a coffee": "\u8ACB\u6211\u559D\u676F\u5496\u5561",
+  "If Tube helps you, a star or a coffee keeps it going.": "\u5982\u679C Tube \u5C0D\u4F60\u6709\u5E6B\u52A9\uFF0C\u7D66\u9846\u661F\u6216\u8ACB\u676F\u5496\u5561\u652F\u6301\u4E00\u4E0B\u5427\u3002"
 };
 
 // panel/src/i18n/i18n.ts
@@ -4281,7 +4321,7 @@ async function renderChannel() {
          <div class="mt-4 space-y-5">${c.videos.length ? tab === "shorts" ? shortGrid(c.videos) : c.videos.map(rowCard).join("") : empty(tab === "shorts" ? "This channel has no Shorts." : tab === "streams" ? "This channel has no live streams." : "No videos.")}</div>`;
   hydrate(el);
 }
-var ABOUT = { version: "1.1.1", author: "net-runners-com", repo: "https://github.com/net-runners-com/tube" };
+var ABOUT = { version: "1.1.2", author: "net-runners-com", repo: "https://github.com/net-runners-com/tube", coffee: "https://buymeacoffee.com/hiroto.netrunners" };
 var LIB_TABS = () => S.account ? [["history", "History"], ["playlists", "Playlists"], ["watchlater", "Watch later"], ["liked", "Liked"], ["saved", "Saved"]] : [["history", "History"], ["playlists", "Playlists"], ["saved", "Saved"]];
 async function renderLibrary(view = "library") {
   const el = $("#v-" + view);
@@ -4384,6 +4424,16 @@ function renderSettings() {
 document.querySelector('#nav').style.opacity = '.8'" class="mt-3 h-40 w-full resize-y rounded-[12px] border border-white/10 bg-black/30 p-3 font-mono text-[11.5px] leading-relaxed outline-none focus:border-brand">${esc(S.drafts.script ?? S.script.code)}</textarea>
          <div class="mt-2 flex flex-wrap gap-2"><button data-act="saveScript" class="rounded-full bg-brand px-5 py-1.5 text-[12px] font-bold">Save</button><button data-act="runScript" class="rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">Run now</button><button data-act="templateScript" class="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[12px] text-[#ddd] hover:bg-white/5">${I.download(14)}<span>Download template</span></button></div>
          <label class="mt-3 flex items-center gap-2.5 text-[12.5px]"><input type="checkbox" data-act="toggleScriptAuto" ${S.script.auto ? "checked" : ""} class="h-4 w-4 accent-[rgb(var(--brand))]">Run automatically when Tube opens</label>
+       </div>`
+  )}
+    ${card(
+    "Support Tube",
+    `<div class="px-4 py-4">
+         <p class="text-[12.5px] leading-relaxed text-mute">If Tube helps you, a star or a coffee keeps it going.</p>
+         <div class="mt-3 grid grid-cols-2 gap-2">
+           <button data-open-url="${esc(ABOUT.repo)}" class="flex items-center justify-center gap-2 rounded-[12px] border border-line py-2.5 text-[12.5px] font-medium hover:bg-white/5">${svg('<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>', { size: 16, sw: 1.7 })}<span>Star on GitHub</span></button>
+           <button data-open-url="${esc(ABOUT.coffee)}" class="flex items-center justify-center gap-2 rounded-[12px] bg-[#ffdd00] py-2.5 text-[12.5px] font-bold text-black hover:brightness-95">${svg('<path d="M5 8h11v6a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v2M11 3v2M14 3v2"/>', { size: 16, sw: 1.8 })}<span>Buy me a coffee</span></button>
+         </div>
        </div>`
   )}
     ${card("Updates", `<div id="updatesCard">${updatesHtml()}</div>`)}

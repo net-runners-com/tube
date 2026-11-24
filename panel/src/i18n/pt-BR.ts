@@ -327,4 +327,8 @@ export default {
   'Download template': 'Baixar modelo',
   'Template saved': 'Modelo salvo',
   'Template added to the editor': 'Modelo adicionado ao editor',
+  'Support Tube': 'Apoie o Tube',
+  'Star on GitHub': 'Estrela no GitHub',
+  'Buy me a coffee': 'Me pague um café',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Se o Tube te ajuda, uma estrela ou um café mantém ele vivo.',
 }

@@ -327,4 +327,8 @@ export default {
   'Download template': '템플릿 다운로드',
   'Template saved': '템플릿을 저장했습니다',
   'Template added to the editor': '템플릿을 편집기에 넣었습니다',
+  'Support Tube': 'Tube 응원하기',
+  'Star on GitHub': 'GitHub에서 스타',
+  'Buy me a coffee': '커피 한 잔 사주기',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Tube가 도움이 됐다면 스타나 커피로 응원해 주세요.',
 }

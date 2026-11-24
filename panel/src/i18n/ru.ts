@@ -326,5 +326,9 @@ export default {
   'Script error: {why}': 'Ошибка скрипта: {why}',
   'Download template': 'Скачать шаблон',
   'Template saved': 'Шаблон сохранён',
-  'Template added to the editor': 'Шаблон добавлен в редактор'
+  'Template added to the editor': 'Шаблон добавлен в редактор',
+  'Support Tube': 'Поддержать Tube',
+  'Star on GitHub': 'Звезда на GitHub',
+  'Buy me a coffee': 'Угостить кофе',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Если Tube вам полезен, звезда или кофе помогут его развитию.',
 }

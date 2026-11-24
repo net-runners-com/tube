@@ -327,4 +327,8 @@ export default {
   'Download template': 'テンプレートをダウンロード',
   'Template saved': 'テンプレートを保存しました',
   'Template added to the editor': 'テンプレートをエディタに入れました',
+  'Support Tube': 'Tube を応援',
+  'Star on GitHub': 'GitHub でスター',
+  'Buy me a coffee': 'コーヒーをおごる',
+  'If Tube helps you, a star or a coffee keeps it going.': 'Tube が役に立ったら、スターやコーヒーで応援してください。',
 }
