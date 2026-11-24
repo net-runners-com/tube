@@ -80,7 +80,7 @@ function rangeAt(sb, t) {
 const once = (target, ev) => new Promise((r) => target.addEventListener(ev, r, { once: true }))
 
 type Request = (method: string, input?: any, timeoutMs?: number) => Promise<any>
-type Hooks = { onError?: (e: Error) => void; onBuffer?: (end: number) => void }
+type Hooks = { onError?: (e: Error) => void; onBuffer?: (end: number) => void; /** seconds to buffer ahead (default 40) */ ahead?: number }
 
 export class Player {
   video: HTMLVideoElement
@@ -94,8 +94,10 @@ export class Player {
   url = ''
   timer: ReturnType<typeof setInterval> | null = null
   onSeeking: (() => void) | null = null
+  ahead: number
 
-  constructor(video: HTMLVideoElement, request: Request, { onError, onBuffer }: Hooks = {}) {
+  constructor(video: HTMLVideoElement, request: Request, { onError, onBuffer, ahead = AHEAD }: Hooks = {}) {
+    this.ahead = ahead
     this.video = video
     this.request = request
     this.onError = onError ?? (() => {})
@@ -226,7 +228,7 @@ export class Player {
     if (tr.busy || tr.done || tr.stalled || Date.now() < (tr.retryAt ?? 0)) return
     const t = this.video.currentTime
     const end = rangeAt(tr.sb, t)?.[1] ?? t
-    if (end - t > AHEAD && !tr.reset) return
+    if (end - t > this.ahead && !tr.reset) return
     const gen = tr.gen
     tr.busy = true
     try {

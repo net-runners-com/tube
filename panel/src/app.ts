@@ -336,7 +336,7 @@ const vmeta = (v) => (v.live ? [v.views != null ? t('{n} watching', { n: count(v
 function bigCard(v) {
   const sub = S.subs.find((c) => c.id === v.channelId)
   return `<button data-watch="${esc(v.id)}" class="block w-full text-left">
-    <div class="relative">${img(v.thumb, 'aspect-video w-full rounded-[18px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
+    <div class="relative overflow-hidden rounded-[18px]"${v.live ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[18px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
     <div class="mt-3 flex gap-2.5">
       ${channelAvatar(v.channelId, sub?.avatar, v.channel, 'mt-0.5 h-6 w-6 shrink-0 text-[10px]')}
       <div class="min-w-0 flex-1">
@@ -356,7 +356,7 @@ function shortCard(v) {
 const shortGrid = (items) => `<div class="grid grid-cols-2 gap-x-3 gap-y-4">${items.map(shortCard).join('')}</div>`
 function rowCard(v) {
   return `<button data-watch="${esc(v.id)}" class="flex w-full items-start gap-3.5 text-left">
-    <div class="relative w-[46%] max-w-[180px] shrink-0">${img(v.thumb, 'aspect-video w-full rounded-[14px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
+    <div class="relative w-[46%] max-w-[180px] shrink-0 overflow-hidden rounded-[14px]"${v.live ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[14px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
     <div class="min-w-0 flex-1 pt-1">
       <p class="clamp3 text-[12px] font-medium leading-[1.3]">${esc(v.title)}</p>
       <p class="mt-1.5 truncate text-[9.5px] text-[#cfcfcf]">${esc([v.channel, vmeta(v)].filter(Boolean).join(' . '))}</p>
@@ -1019,7 +1019,7 @@ video.addEventListener('playing', () => log(`playing ${S.watch?.id} at ${video.c
 video.addEventListener('seeked', () => log(`seeked to ${video.currentTime.toFixed(1)}s`))
 video.addEventListener('error', () => log(`video error ${video.error?.code} ${video.error?.message}`))
 video.addEventListener('timeupdate', () => {
-  if (S.watch?.live) {
+  if (S.watch?.live && !scrubbing) {
     const edge = video.seekable.length ? video.seekable.end(video.seekable.length - 1) : video.currentTime
     const behind = edge - video.currentTime
     $('#tCur').innerHTML = `<span class="mr-1 inline-block h-1.5 w-1.5 rounded-full ${behind < 20 ? 'bg-brand' : 'bg-white/50'} align-middle"></span>LIVE`
@@ -1030,6 +1030,7 @@ video.addEventListener('timeupdate', () => {
     placeKnob(pct)
     return
   }
+  if (scrubbing) return
   const d = S.watch?.duration || video.duration || 0
   $('#tCur').textContent = clock(video.currentTime)
   $('#tDur').textContent = clock(d)
@@ -2169,6 +2170,60 @@ document.addEventListener('pointerover', (e) => {
   }, 300)
 })
 
+/* Hover preview: resting on a video tile plays it, muted, over its thumbnail (video track only,
+   10 s buffered), like YouTube's inline preview. Uses the hover prefetch's tube.watch answer. */
+let pv: { id: string; el: HTMLVideoElement; player: Player } | null = null
+let pvWant = ''
+let pvTimer = 0
+function stopPreview() {
+  clearTimeout(pvTimer)
+  pvWant = ''
+  if (!pv) return
+  pv.player.destroy()
+  pv.el.remove()
+  pv = null
+}
+async function startPreview(box: HTMLElement, id: string) {
+  pvWant = id
+  const r = await call('tube.watch', { id, maxHeight: S.quality }, 90_000)
+  if (pvWant !== id || !box.isConnected || !r.watch?.video || r.watch.live) return
+  stopPreview()
+  pvWant = id
+  const el = document.createElement('video')
+  el.muted = true
+  el.playsInline = true
+  el.loop = false
+  el.className = 'pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300'
+  box.append(el)
+  const player = new Player(el, call, { ahead: 10, onError: () => stopPreview() })
+  pv = { id, el, player }
+  el.addEventListener('playing', () => el.classList.remove('opacity-0'), { once: true })
+  try {
+    await player.load({ ...r.watch, audio: null }, 0)
+    if (pv?.el === el) await el.play()
+  } catch {
+    if (pv?.el === el) stopPreview()
+  }
+}
+document.addEventListener('pointerover', (e) => {
+  const box = tg(e).closest?.('[data-pv]') as HTMLElement | null
+  const id = box?.closest<HTMLElement>('[data-watch]')?.dataset.watch
+  if (!box || !id) return
+  if (pvWant === id || pv?.id === id) return
+  stopPreview()
+  // no preview while Orca's window is in the background, and not for the video already playing
+  if (document.hidden || id === S.watch?.id) return
+  pvWant = id
+  pvTimer = setTimeout(() => void startPreview(box, id), 600)
+})
+document.addEventListener('pointerout', (e) => {
+  const box = tg(e).closest?.('[data-pv]')
+  if (box && !box.contains((e as PointerEvent).relatedTarget as Node)) stopPreview()
+})
+// leaving the list (opening a video, switching views, hiding Orca) ends the preview
+document.addEventListener('click', stopPreview, true)
+document.addEventListener('visibilitychange', () => document.hidden && stopPreview())
+
 /* ---------------- live chat ---------------- */
 // Polled through the worker every few seconds while the watch view shows the chat.
 let chatSeq = 0
@@ -2434,6 +2489,7 @@ function sheet(url: string): Promise<string> {
   return p
 }
 let previewWant = -1
+const PREVIEW_SCALE = 0.7 // 160×90 frames shown at 112×63
 let previewSheet = ''
 function showPreview(at: number | null, x: number, width: number) {
   const b = S.watch?.board
@@ -2444,19 +2500,20 @@ function showPreview(at: number | null, x: number, width: number) {
   const s = Math.min(b.sheets.length - 1, Math.floor(i / per))
   const k = Math.min(per - 1, i - s * per)
   el.hidden = false
-  el.style.width = `${b.w}px`
-  el.style.height = `${b.h}px`
-  const half = b.w / 2 + 6
+  const z = PREVIEW_SCALE
+  el.style.width = `${b.w * z}px`
+  el.style.height = `${b.h * z}px`
+  const half = (b.w * z) / 2 + 6
   el.style.left = `${Math.max(half, Math.min(width - half, x))}px`
   previewWant = i
   void sheet(b.sheets[s]).then((d) => {
     if (previewWant !== i || !d) return
     if (previewSheet !== b.sheets[s]) {
       el.style.backgroundImage = `url("${d}")`
-      el.style.backgroundSize = `${b.cols * b.w}px ${b.rows * b.h}px`
+      el.style.backgroundSize = `${b.cols * b.w * z}px ${b.rows * b.h * z}px`
       previewSheet = b.sheets[s]
     }
-    el.style.backgroundPosition = `-${(k % b.cols) * b.w}px -${Math.floor(k / b.cols) * b.h}px`
+    el.style.backgroundPosition = `-${(k % b.cols) * b.w * z}px -${Math.floor(k / b.cols) * b.h * z}px`
   })
 }
 // fetch every sheet as soon as the pointer reaches the bar, so scrubbing shows frames without waiting
@@ -2476,6 +2533,15 @@ function seekTimeAt(f: number): number | null {
 const barFraction = (e) => {
   const r = $('#seekbar').getBoundingClientRect()
   return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
+}
+// While dragging, the bar and knob follow the pointer; the video seeks once, on release.
+let scrubbing = false
+function scrubTo(f: number) {
+  const pct = `${f * 100}%`
+  $('#pCur').style.width = pct
+  placeKnob(pct)
+  const at = seekTimeAt(f)
+  if (at != null && !S.watch?.live) $('#tCur').textContent = clock(at)
 }
 function seekFromEvent(e) {
   const t = seekTimeAt(barFraction(e))
@@ -2500,10 +2566,20 @@ $('#seekbar').addEventListener('pointerdown', (e) => {
   const bar = $('#seekbar')
   bar.setPointerCapture(e.pointerId)
   bar.classList.add('drag')
-  seekFromEvent(e)
-  const move = (ev) => seekFromEvent(ev)
+  scrubbing = true
+  scrubTo(barFraction(e))
+  const move = (ev) => scrubTo(barFraction(ev))
+  const end = (ev) => {
+    bar.removeEventListener('pointermove', move)
+    bar.removeEventListener('pointerup', end)
+    bar.removeEventListener('pointercancel', end)
+    bar.classList.remove('drag')
+    scrubbing = false
+    seekFromEvent(ev)
+  }
   bar.addEventListener('pointermove', move)
-  bar.addEventListener('pointerup', () => (bar.removeEventListener('pointermove', move), bar.classList.remove('drag')), { once: true })
+  bar.addEventListener('pointerup', end)
+  bar.addEventListener('pointercancel', end)
 })
 
 /* Sticky headers get a hairline once the page scrolls; the channel one turns from clear to solid. */
