@@ -346,7 +346,7 @@ function channelRow(c) {
   </li>`
 }
 const tubeLogo = () => `<button data-nav="home" class="flex items-center gap-1.5" aria-label="Home">
-    <span class="grid h-[24px] w-[24px] place-items-center rounded-[7px] bg-brand text-white">${I.tube(20)}</span>
+    <span class="grid h-[18px] w-[25px] place-items-center rounded-[5px] bg-brand text-white">${I.tube(16)}</span>
     <span class="logo text-[20px] font-bold tracking-tight">Tube</span></button>`
 /** Every page's header: Tube on the left, the page title in the middle, your account on the right. */
 const header = (title, { account = true, cls = '', titleCls = '' } = {}) => `<header class="sticky-head ${cls} grid h-[60px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-5">
