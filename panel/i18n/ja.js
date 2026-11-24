@@ -222,6 +222,9 @@ export default {
 
   // settings
   Playback: '再生',
+  'Connect to the internet': 'インターネットに接続してください',
+  "You're offline. Check your connection.": '現在オフラインです。接続を確認してください。',
+  'Still offline': 'まだオフラインです',
   'Maximum quality': '最大画質',
   'Higher quality streams more data through the worker. Applies to the next video.': '高画質ほど Worker 経由の通信量が増えます。次の動画から反映されます。',
   Data: 'データ',

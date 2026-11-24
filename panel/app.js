@@ -11,6 +11,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 /* ---------------- worker bridge ---------------- */
 async function call(method, input = {}, timeoutMs = 60_000) {
+  const r = await callRaw(method, input, timeoutMs)
+  if (r?.error && method !== 'tube.ping' && NET_DOWN.test(r.error)) void checkOnline()
+  return r
+}
+async function callRaw(method, input = {}, timeoutMs = 60_000) {
   input = JSON.parse(JSON.stringify(input)) // drop undefined fields: the bridge only takes JSON
   for (let attempt = 0; ; attempt++) {
     try {
@@ -24,6 +29,8 @@ async function call(method, input = {}, timeoutMs = 60_000) {
     }
   }
 }
+// network failures reported by the worker (DNS, refused, reset, timeouts)
+const NET_DOWN = /ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ENETUNREACH|EHOSTUNREACH|ECONNRESET|ETIMEDOUT|getaddrinfo|network is unreachable|Unable to download|timed out|fetch failed/i
 
 /* ---------------- storage ---------------- */
 const store = {
@@ -1950,6 +1957,31 @@ function runUserScript(code) {
   el.remove()
 }
 
+/* ---------------- offline ---------------- */
+// Shown when the frame says it is offline or a request fails for network reasons, and only once
+// the worker confirms YouTube is unreachable. Clears itself when the connection comes back.
+let offline = false
+let checking = null
+function setOffline(on) {
+  if (on === offline) return
+  offline = on
+  $('#offline').hidden = !on
+  if (!on) {
+    feedCache = null
+    show(S.view)
+  }
+}
+function checkOnline() {
+  checking ??= callRaw('tube.ping', {}, 8000)
+    .then((r) => setOffline(!r?.ok))
+    .finally(() => (checking = null))
+  return checking
+}
+addEventListener('offline', () => void checkOnline())
+addEventListener('online', () => void checkOnline())
+// while offline, look again every 15 s
+setInterval(() => offline && void checkOnline(), 15_000)
+
 /* ---------------- prefetch ---------------- */
 // Resting on a video card for a moment asks the worker to resolve it, so opening it is quick.
 let hoverTimer = 0
@@ -2565,6 +2597,13 @@ document.addEventListener('click', (e) => {
     }
     case 'plRefresh':
       return void renderPlaylists($('#v-library'), LIB_TABS(), true)
+    case 'retryOnline': {
+      t.disabled = true
+      return void checkOnline().finally(() => {
+        t.disabled = false
+        if (offline) toast('Still offline')
+      })
+    }
     case 'download':
       return void (S.watch && download(S.watch))
     case 'copyLink':
@@ -2976,6 +3015,7 @@ syncPlayButtons()
       log(`remote click ${text}: ${el ? el.tagName : 'not found'}`)
       return void el?.click()
     }
+    if (ui === 'offline') return void setOffline(text !== 'off')
     if (ui === 'lang') return void changeLang(text || 'auto')
     if (ui === 'upnext') return void useUpNextSource(text ?? '')
     if (ui === 'scroll') return void window.scrollTo(0, +(text ?? 0))

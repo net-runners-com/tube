@@ -213,6 +213,18 @@ const fail = (e: unknown) => ({ error: e instanceof Error ? e.message : String(e
 export default function activate(orca: OrcaWorkerApi): void {
   const handle = orca.panels.handle as (name: string, fn: (input: any) => unknown) => void
 
+  /** Can we reach YouTube? (the offline screen's check) */
+  handle('tube.ping', () =>
+    new Promise((ok) => {
+      const req = https.request('https://www.youtube.com/generate_204', { method: 'HEAD', timeout: 6000 }, (res) => {
+        res.resume()
+        ok({ ok: (res.statusCode ?? 0) < 500 })
+      })
+      req.on('timeout', () => req.destroy())
+      req.on('error', () => ok({ ok: false }))
+      req.end()
+    })
+  )
   handle('tube.status', async () => ({ ytdlp: YTDLP ?? null, signedIn: auth.signedIn() }))
 
   /* ---- account ---- */

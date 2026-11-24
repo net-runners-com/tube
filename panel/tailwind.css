@@ -27,6 +27,9 @@ body { font-family: "Google Sans", "Product Sans", -apple-system, BlinkMacSystem
 #stage:fullscreen video { object-fit: contain; }
 button { cursor: pointer; }
 [hidden] { display: none !important; }
+.offline-tv { animation: offline-float 3.2s ease-in-out infinite; transform-origin: 105px 90px; }
+@keyframes offline-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .offline-tv { animation: none; } }
 
 /* search overlay + account sheet transitions */
 #searchOverlay .so-backdrop, #sheet .sheet-backdrop { opacity: 0; transition: opacity .18s ease; }
