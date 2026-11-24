@@ -3,10 +3,12 @@
 import { spawn } from 'node:child_process'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import * as http from 'node:http'
 import * as https from 'node:https'
 import type { OrcaWorkerApi } from 'orca/worker'
 import * as auth from './auth'
 import { chatPoll, chatStart } from './chat'
+import * as bg from './bgplay'
 import { channel, channelAvatar, comments, downloadState, playlistVideos, startDownload, type Caption, parseJson3, pickCaptions, type ChannelTab, feed, type Feed, pickFormats, search, type SearchOpts, type Track, type Watch, ytdlp, YTDLP, thumbOf } from './yt'
 
 /** Panel answers are capped at 1 MiB of JSON: 720 KB of bytes is 960 KB of base64. */
@@ -208,12 +210,78 @@ function getRange(url: string, headers: Record<string, string>, redirects = 3): 
   })
 }
 
+/**
+ * Loopback proxy for the background player: /s/<stream key> serves the stream with Range support,
+ * fetched through getRange (the request shape googlevideo accepts). Bound to 127.0.0.1 only, with a
+ * random path token, and started on first use.
+ */
+let proxy: { port: number; token: string } | null = null
+function startProxy(): Promise<{ port: number; token: string }> {
+  if (proxy) return Promise.resolve(proxy)
+  const token = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+  const server = http.createServer(async (req, res) => {
+    const m = /^\/(\w+)\/s\/(.+)$/.exec(req.url ?? '')
+    const st = m && m[1] === token ? streams.get(decodeURIComponent(m[2])) : undefined
+    if (!st) return void (res.writeHead(404), res.end())
+    const r = /bytes=(\d+)-(\d*)/.exec(String(req.headers.range ?? ''))
+    let pos = r ? Number(r[1]) : 0
+    const end = r && r[2] ? Math.min(Number(r[2]), st.size - 1) : st.size - 1
+    res.writeHead(r ? 206 : 200, {
+      'Content-Type': 'application/octet-stream',
+      'Accept-Ranges': 'bytes',
+      'Content-Length': String(end - pos + 1),
+      ...(r ? { 'Content-Range': `bytes ${pos}-${end}/${st.size}` } : {})
+    })
+    let gone = false
+    req.on('close', () => (gone = true))
+    try {
+      while (pos <= end && !gone) {
+        const to = Math.min(end, pos + 1_048_575)
+        const buf = await getRange(st.url, { ...st.headers, Range: `bytes=${pos}-${to}` })
+        if (!buf.length) break
+        // respect the player's pace: wait for the socket to drain before the next megabyte
+        if (!res.write(buf)) await new Promise((ok) => res.once('drain', ok))
+        pos += buf.length
+      }
+    } catch {}
+    res.end()
+  })
+  return new Promise((ok, no) => {
+    server.on('error', no)
+    server.listen(0, '127.0.0.1', () => {
+      proxy = { port: (server.address() as { port: number }).port, token }
+      ok(proxy)
+    })
+  })
+}
+
 const fail = (e: unknown) => ({ error: e instanceof Error ? e.message : String(e) })
 
 export default function activate(orca: OrcaWorkerApi): void {
   const handle = orca.panels.handle as (name: string, fn: (input: any) => unknown) => void
 
-  handle('tube.status', async () => ({ ytdlp: YTDLP ?? null, signedIn: auth.signedIn() }))
+  handle('tube.status', async () => ({ ytdlp: YTDLP ?? null, signedIn: auth.signedIn(), bgPlayer: bg.player() }))
+
+  /** Heartbeat while the panel plays; see bgplay.ts. `video`/`audio` are stream keys, `hls` a live key. */
+  handle('tube.beat', async (b: bg.Beat & { video?: string; audio?: string; hls?: string }) => {
+    if (b.playing && b.on && !proxy) await startProxy().catch(() => null)
+    bg.beat(
+      b,
+      () => {
+        if (b.hls) {
+          const l = liveSources.get(b.hls)
+          return l ? { hls: l.url, headers: l.headers } : null
+        }
+        if (!proxy || !b.video || !b.audio || !streams.has(b.video) || !streams.has(b.audio)) return null
+        const base = `http://127.0.0.1:${proxy.port}/${proxy.token}/s/`
+        return { video: base + encodeURIComponent(b.video), audio: base + encodeURIComponent(b.audio), headers: {} }
+      },
+      (m) => orca.log(m)
+    )
+    return null
+  })
+  /** The panel opened: if the background window plays, close it and say where it got to. */
+  handle('tube.takeBack', async () => ({ handoff: bg.take() }))
 
   /* ---- account ---- */
   const forget = () => {

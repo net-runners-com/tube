@@ -222,6 +222,12 @@ export default {
 
   // settings
   Playback: '再生',
+  'Background playback': 'バックグラウンド再生',
+  'Keeps playing in a small floating window when you switch to another view in Orca.': 'Orca で別の画面に移っても、小さなフローティングウィンドウで再生を続けます。',
+  'Needs mpv or ffmpeg (brew install mpv). Orca closes plugin panels when you switch views, so playback moves to a floating player.': 'mpv か ffmpeg が必要です（brew install mpv）。Orca は画面を切り替えるとプラグインのパネルを閉じるため、再生をフローティングプレーヤーに引き継ぎます。',
+  'Background playback on': 'バックグラウンド再生: オン',
+  'Background playback off': 'バックグラウンド再生: オフ',
+  'Back from the floating player': 'フローティングプレーヤーから戻しました',
   'Maximum quality': '最大画質',
   'Higher quality streams more data through the worker. Applies to the next video.': '高画質ほど Worker 経由の通信量が増えます。次の動画から反映されます。',
   Data: 'データ',

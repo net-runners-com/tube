@@ -210,6 +210,7 @@ const S = {
   audioOpen: false,
   commentsOpen: false,
   lang: 'auto',
+  bgPlay: true, // keep playing in a floating window when Tube is hidden
   lofi: false,
   lofiThumb: false, // Lofi card shows the thumbnail instead of the video
   shuffle: false,
@@ -608,7 +609,11 @@ function renderSettings() {
          <div class="mt-3 grid grid-cols-4 gap-1 rounded-[12px] bg-black/30 p-1 text-[12px]">
            ${QUALITIES.map((q) => `<button data-quality="${q}" class="${S.quality === q ? 'bg-brand font-bold text-white' : 'text-[#bbb]'} rounded-[9px] py-1.5">${q}p</button>`).join('')}
          </div>
-         <p class="mt-2.5 text-[11px] leading-relaxed text-mute">Higher quality streams more data through the worker. Applies to the next video.</p></div>`
+         <p class="mt-2.5 text-[11px] leading-relaxed text-mute">Higher quality streams more data through the worker. Applies to the next video.</p></div>
+       <label class="flex items-start justify-between gap-3 border-t border-white/5 px-4 py-3.5">
+         <span><span class="block text-[13px]">Background playback</span>
+           <span class="mt-1 block text-[11px] leading-relaxed text-mute">${S.bgPlayer ? 'Keeps playing in a small floating window when you switch to another view in Orca.' : 'Needs mpv or ffmpeg (brew install mpv). Orca closes plugin panels when you switch views, so playback moves to a floating player.'}</span></span>
+         <input type="checkbox" data-act="toggleBg" ${S.bgPlay ? 'checked' : ''} ${S.bgPlayer ? '' : 'disabled'} class="mt-0.5 h-4 w-4 shrink-0 accent-[rgb(var(--brand))]"></label>`
     )}
     ${card(
       'Data',
@@ -1950,6 +1955,39 @@ function runUserScript(code) {
   el.remove()
 }
 
+/* ---------------- background playback ---------------- */
+// Orca removes this panel when another view shows; the worker notices the missing beats and
+// carries on in a floating player. Beats are tiny and only sent while something plays.
+function beat() {
+  const w = S.watch
+  if (!w) return
+  const playing = !video.paused && !video.ended
+  void call('tube.beat', {
+    id: w.id,
+    t: video.currentTime,
+    playing,
+    on: !!(S.bgPlay && S.bgPlayer),
+    volume: video.muted ? 0 : video.volume,
+    title: w.title ?? '',
+    video: w.video?.key,
+    audio: w.audio?.key,
+    hls: w.live ? w.hls : undefined,
+    meta: { id: w.id, title: w.title, channel: w.channel, channelId: w.channelId, thumb: w.thumb, duration: w.duration }
+  })
+}
+setInterval(() => {
+  if (S.watch && !video.paused) beat()
+}, 1000)
+video.addEventListener('pause', beat)
+video.addEventListener('ended', beat)
+async function takeBack() {
+  const r = await call('tube.takeBack')
+  const h = r.handoff
+  if (!h?.meta) return
+  toast('Back from the floating player')
+  void openWatch(h.meta, { startAt: h.t })
+}
+
 /* ---------------- prefetch ---------------- */
 // Resting on a video card for a moment asks the worker to resolve it, so opening it is quick.
 let hoverTimer = 0
@@ -2601,6 +2639,11 @@ document.addEventListener('click', (e) => {
     case 'togglePart':
       S.theme.layout.hide[d.part] = !t.checked
       return saveTheme()
+    case 'toggleBg':
+      S.bgPlay = t.checked
+      store.set('bgPlay', S.bgPlay)
+      beat()
+      return toast(S.bgPlay ? 'Background playback on' : 'Background playback off')
     case 'resetColors':
       S.theme.custom = {}
       saveTheme()
@@ -2912,7 +2955,7 @@ syncPlayButtons()
 
 ;(async () => {
   // every stored setting in one round trip instead of one after another
-  const keys = { account: null, history: [], saved: [], quality: 720, recent: [], lang: null, theme: {}, script: {}, lofi: false, lofiThumb: false, speed: 1, cc: '', autoplay: true, audio: {}, volume: { v: 1, muted: false }, avatars: {}, subs: [], subsAccount: [], chAvatars: {} }
+  const keys = { account: null, history: [], saved: [], quality: 720, recent: [], lang: null, theme: {}, script: {}, bgPlay: true, lofi: false, lofiThumb: false, speed: 1, cc: '', autoplay: true, audio: {}, volume: { v: 1, muted: false }, avatars: {}, subs: [], subsAccount: [], chAvatars: {} }
   const got = Object.fromEntries(await Promise.all(Object.entries(keys).map(async ([k, d]) => [k, await store.get(k, d)])))
   for (const [u, d] of Object.entries(got.avatars ?? {})) (avatarData.set(u, d), imgCache.set(u, d))
   for (const [id, u] of Object.entries(got.chAvatars ?? {})) chAvatars.set(id, u)
@@ -2932,7 +2975,7 @@ syncPlayButtons()
   applyTheme()
   S.script = { ...S.script, ...got.script }
   if (S.script.auto && S.script.code.trim()) runUserScript(S.script.code)
-  ;({ lofi: S.lofi, lofiThumb: S.lofiThumb, speed: S.speed, cc: S.cc, autoplay: S.autoplay } = got)
+  ;({ bgPlay: S.bgPlay, lofi: S.lofi, lofiThumb: S.lofiThumb, speed: S.speed, cc: S.cc, autoplay: S.autoplay } = got)
   Object.assign(S, (({ boost = 1, semis = 0, hz = 440 }) => ({ boost, semis, hz }))(got.audio ?? {}))
   video.volume = got.volume.v
   video.muted = got.volume.muted
@@ -3005,6 +3048,8 @@ syncPlayButtons()
   })
   const st = await call('tube.status')
   S.ytdlp = st.ytdlp
+  S.bgPlayer = st.bgPlayer
   show('home')
+  void takeBack()
   if (!st.ytdlp) toast('yt-dlp was not found on this machine')
 })()
