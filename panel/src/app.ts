@@ -1024,8 +1024,10 @@ video.addEventListener('timeupdate', () => {
     const behind = edge - video.currentTime
     $('#tCur').innerHTML = `<span class="mr-1 inline-block h-1.5 w-1.5 rounded-full ${behind < 20 ? 'bg-brand' : 'bg-white/50'} align-middle"></span>LIVE`
     $('#tDur').textContent = behind >= 20 ? `-${clock(behind)}` : ''
-    $('#pCur').style.width = '100%'
-    $('#pKnob').style.left = '100%'
+    const [a, b] = liveRange()
+    const pct = b > a ? `${Math.min(100, ((video.currentTime - a) / (b - a)) * 100)}%` : '100%'
+    $('#pCur').style.width = pct
+    placeKnob(pct)
     return
   }
   const d = S.watch?.duration || video.duration || 0
@@ -1033,9 +1035,16 @@ video.addEventListener('timeupdate', () => {
   $('#tDur').textContent = clock(d)
   const pct = d ? `${(video.currentTime / d) * 100}%` : '0'
   $('#pCur').style.width = pct
-  $('#pKnob').style.left = pct
+  placeKnob(pct)
   if (heatFor !== S.watch?.id) drawHeat()
 })
+// keep the knob whole at either end of the bar
+const placeKnob = (pct) => ($('#pKnob').style.left = `clamp(7px, ${pct}, calc(100% - 7px))`)
+/** A live stream's seekable window: what can be rewound to, and the live edge. */
+function liveRange(): [number, number] {
+  const s = video.seekable
+  return s.length ? [s.start(0), s.end(s.length - 1)] : [video.currentTime, video.currentTime]
+}
 /* Most replayed: YouTube's per-slice watch counts as a soft curve over the seek bar. */
 let heatFor = ''
 function drawHeat() {
@@ -2408,19 +2417,32 @@ document.addEventListener('pointerdown', (e) => {
   if (document.activeElement === $('#volSlider')) $('#volSlider').blur()
 }, true)
 
-function seekFromEvent(e) {
-  const r = $('#seekbar').getBoundingClientRect()
+/** Where a point on the seek bar lands: seconds into the video, or into a live stream's rewind window. */
+function seekTimeAt(f: number): number | null {
+  if (S.watch?.live) {
+    const [a, b] = liveRange()
+    return b > a ? a + f * (b - a) : null
+  }
   const d = S.watch?.duration || video.duration
-  if (!d) return
-  video.currentTime = Math.max(0, Math.min(d - 0.5, ((e.clientX - r.left) / r.width) * d))
+  return d && isFinite(d) ? Math.min(d - 0.5, f * d) : null
+}
+const barFraction = (e) => {
+  const r = $('#seekbar').getBoundingClientRect()
+  return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
+}
+function seekFromEvent(e) {
+  const t = seekTimeAt(barFraction(e))
+  if (t != null) video.currentTime = Math.max(0, t)
 }
 // Hover: the time under the pointer, kept inside the player's edges.
 $('#seekbar').addEventListener('pointermove', (e) => {
   const r = $('#seekbar').getBoundingClientRect()
-  const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
-  const d = S.watch?.duration || video.duration || 0
+  const f = barFraction(e)
+  const at = seekTimeAt(f)
   const tip = $('#seekTip')
-  tip.textContent = clock(f * d)
+  // live: how far behind the live edge that point is
+  const behind = S.watch?.live && at != null ? liveRange()[1] - at : 0
+  tip.textContent = at == null ? '' : S.watch?.live ? (behind < 5 ? 'LIVE' : `-${clock(behind)}`) : clock(at)
   const half = tip.offsetWidth / 2 + 6
   tip.style.left = `${Math.max(half, Math.min(r.width - half, f * r.width))}px`
   $('#pHover').style.width = `${f * 100}%`
