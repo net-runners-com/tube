@@ -4,6 +4,6 @@
 set -e
 cd "$(dirname "$0")/.."
 ESBUILD="npx esbuild"
-$ESBUILD panel/src/app.ts --bundle --format=esm --target=es2022 --outfile=panel/app.js --log-level=warning
-$ESBUILD panel/src/pitch-worklet.ts --bundle --format=esm --target=es2022 --outfile=panel/pitch-worklet.js --log-level=warning
+$ESBUILD panel/src/app.ts --bundle --minify --format=esm --target=es2022 --outfile=panel/app.js --log-level=warning
+$ESBUILD panel/src/pitch-worklet.ts --bundle --minify --format=esm --target=es2022 --outfile=panel/pitch-worklet.js --log-level=warning
 ./scripts/build-css.sh

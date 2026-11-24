@@ -576,7 +576,7 @@ async function renderChannel() {
 }
 
 /** Shown in Settings ▸ About (keep in step with orca-plugin.json). */
-const ABOUT = { version: '1.1.2', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube', coffee: 'https://buymeacoffee.com/hiroto.netrunners' }
+const ABOUT = { version: '1.1.3', author: 'net-runners-com', repo: 'https://github.com/net-runners-com/tube', coffee: 'https://buymeacoffee.com/hiroto.netrunners' }
 const LIB_TABS = () =>
   S.account
     ? [['history', 'History'], ['playlists', 'Playlists'], ['watchlater', 'Watch later'], ['liked', 'Liked'], ['saved', 'Saved']]
