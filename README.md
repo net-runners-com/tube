@@ -66,9 +66,11 @@ youtube.com page, no ads in the feed.
 
 ### 🪟 Picture-in-picture
 
+<img src="assets/pip.jpg" alt="A floating picture-in-picture window over Tube" width="100%">
+
 - Pop the video out into a **floating window** that stays on top of every app, and keep watching
   while you code in Orca or anywhere else.
-- Tube's own controls in the window: play / pause, ±10 s, the seek bar — and captions stay on.
+- Controls right on the window: play / pause, ±10 s and the seek bar.
 - Works from the player, the mini player and Lofi mode; one click brings the video back.
 
 ### 🎨 Make it yours

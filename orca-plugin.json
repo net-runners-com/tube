@@ -33,6 +33,11 @@
       "caption": "Everything under the player"
     },
     {
+      "path": "assets/pip.jpg",
+      "alt": "A floating picture-in-picture window over Tube",
+      "caption": "Picture-in-picture over any app"
+    },
+    {
       "path": "assets/themes.jpg",
       "alt": "Theme settings with styles, accent colours and layout",
       "caption": "Themes, layout and your own CSS"
