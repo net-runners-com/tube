@@ -153,6 +153,7 @@ async function resolveWatch(id: string, maxHeight: number, ck: string): Promise<
     likes: j.like_count ?? null,
     duration: j.duration ?? 0,
     board: storyboard(j.formats ?? []),
+    members: j.availability === 'subscriber_only',
     heat: Array.isArray(j.heatmap) ? j.heatmap.map((h: any) => Math.round((h.value ?? 0) * 100) / 100) : [],
     uploaded: j.upload_date ?? '',
     thumb: thumbOf(id),

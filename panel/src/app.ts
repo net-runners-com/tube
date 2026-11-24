@@ -324,19 +324,20 @@ const SK = {
   chat: (n = 10) => `<div class="space-y-2.5 py-1">${Array.from({ length: n }, (_, i) => `<div class="flex gap-2"><div class="sk h-3 w-16 shrink-0 rounded"></div><div class="sk h-3 rounded" style="width:${[70, 45, 60, 30, 55][i % 5]}%"></div></div>`).join('')}</div>`
 }
 const empty = (msg) => `<p class="px-6 py-14 text-center text-[12.5px] text-mute">${msg}</p>`
-const notch = `<span class="notch"></span>`
+const membersChip = `<span class="members-chip absolute right-2.5 top-2.5 rounded-full bg-black/75 px-2.5 py-0.5 text-[10.5px] font-medium backdrop-blur">Members only</span>`
 const badge = (v) =>
-  v.live
+  (v.members ? membersChip : '') +
+  (v.live
     ? `<span class="absolute left-2.5 top-2.5 rounded-full bg-brand px-3 py-0.5 text-[10.5px]">Live</span>`
     : v.duration
       ? `<span class="absolute bottom-2 left-2.5 rounded-md bg-black/70 px-1.5 py-[1px] text-[10px] tabular-nums">${clock(v.duration)}</span>`
-      : ''
+      : '')
 const vmeta = (v) => (v.live ? [v.views != null ? t('{n} watching', { n: count(v.views) }) : '', t('live now')] : [v.views != null ? t('{n} views', { n: count(v.views) }) : v.viewsText ?? '']).filter(Boolean).join(' . ')
 
 function bigCard(v) {
   const sub = S.subs.find((c) => c.id === v.channelId)
   return `<button data-watch="${esc(v.id)}" class="block w-full text-left">
-    <div class="relative overflow-hidden rounded-[18px]"${v.live ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[18px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
+    <div class="relative overflow-hidden rounded-[18px]"${v.members ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[18px] object-cover')}${badge(v)}</div>
     <div class="mt-3 flex gap-2.5">
       ${channelAvatar(v.channelId, sub?.avatar, v.channel, 'mt-0.5 h-6 w-6 shrink-0 text-[10px]')}
       <div class="min-w-0 flex-1">
@@ -356,7 +357,7 @@ function shortCard(v) {
 const shortGrid = (items) => `<div class="grid grid-cols-2 gap-x-3 gap-y-4">${items.map(shortCard).join('')}</div>`
 function rowCard(v) {
   return `<button data-watch="${esc(v.id)}" class="flex w-full items-start gap-3.5 text-left">
-    <div class="relative w-[46%] max-w-[180px] shrink-0 overflow-hidden rounded-[14px]"${v.live ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[14px] object-cover')}${badge(v)}${v.live ? notch : ''}</div>
+    <div class="relative w-[46%] max-w-[180px] shrink-0 overflow-hidden rounded-[14px]"${v.members ? '' : ' data-pv'}>${img(v.thumb, 'aspect-video w-full rounded-[14px] object-cover')}${badge(v)}</div>
     <div class="min-w-0 flex-1 pt-1">
       <p class="clamp3 text-[12px] font-medium leading-[1.3]">${esc(v.title)}</p>
       <p class="mt-1.5 truncate text-[9.5px] text-[#cfcfcf]">${esc([v.channel, vmeta(v)].filter(Boolean).join(' . '))}</p>
@@ -1071,9 +1072,9 @@ let liveKey = null
 const LIVE_MASTER = 'https://manifest.googlevideo.com/tube-live-master' // stands for the worker's master URL
 const liveRetries = new Map() // video id → re-resolves after fatal errors
 const newStats = () => ({ aborted: false, loaded: 0, retry: 0, total: 0, chunkCount: 0, bwEstimate: 0, loading: { start: 0, first: 0, end: 0 }, parsing: { start: 0, end: 0 }, buffering: { start: 0, first: 0, end: 0 } })
-async function liveFetch(url, binary) {
+async function liveFetch(url, binary, key = liveKey) {
   if (!binary) {
-    const r = await call('tube.hls', url === LIVE_MASTER ? { key: liveKey } : { key: liveKey, url }, 30_000)
+    const r = await call('tube.hls', url === LIVE_MASTER ? { key } : { key, url }, 30_000)
     if (r.error) throw new Error(r.error)
     return r.text
   }
@@ -1081,7 +1082,7 @@ async function liveFetch(url, binary) {
   let got = 0
   let total = Infinity
   while (got < total) {
-    const r = await call('tube.hls', { key: liveKey, url, start: got }, 30_000)
+    const r = await call('tube.hls', { key, url, start: got }, 30_000)
     if (r.error) throw new Error(r.error)
     const bytes = Uint8Array.from(atob(r.b64), (c) => c.charCodeAt(0))
     if (!bytes.length) break
@@ -1098,7 +1099,10 @@ class WorkerLoader {
   stats: ReturnType<typeof newStats>
   context: any
   aborted: boolean
-  constructor() {
+  key: string | null
+  // hls.js hands its config to each loader: a preview's player carries its own stream key
+  constructor(config?: { tubeKey?: string }) {
+    this.key = config?.tubeKey ?? null
     this.stats = newStats()
     this.context = null
     this.aborted = false
@@ -1120,7 +1124,7 @@ class WorkerLoader {
     this.context = context
     const st = (this.stats = newStats())
     st.loading.start = performance.now()
-    liveFetch(context.url, context.responseType === 'arraybuffer').then(
+    liveFetch(context.url, context.responseType === 'arraybuffer', this.key ?? liveKey).then(
       (data) => {
         if (this.aborted) return
         st.loading.first = st.loading.end = performance.now()
@@ -2170,39 +2174,69 @@ document.addEventListener('pointerover', (e) => {
   }, 300)
 })
 
-/* Hover preview: resting on a video tile plays it, muted, over its thumbnail (video track only,
-   10 s buffered), like YouTube's inline preview. Uses the hover prefetch's tube.watch answer. */
-let pv: { id: string; el: HTMLVideoElement; player: Player } | null = null
+/* Hover preview: resting on a video tile plays it, muted, over its thumbnail, like YouTube's inline
+   preview: the first 10 s of a video on a loop (nothing past them is fetched), or a live stream at its
+   live edge in its lowest quality. Members-only videos get a label instead. */
+const PREVIEW_SECONDS = 10
+let pv: { id: string; el: HTMLVideoElement; stop: () => void } | null = null
 let pvWant = ''
 let pvTimer = 0
 function stopPreview() {
   clearTimeout(pvTimer)
   pvWant = ''
   if (!pv) return
-  pv.player.destroy()
+  pv.stop()
   pv.el.remove()
   pv = null
 }
 async function startPreview(box: HTMLElement, id: string) {
   pvWant = id
   const r = await call('tube.watch', { id, maxHeight: S.quality }, 90_000)
-  if (pvWant !== id || !box.isConnected || !r.watch?.video || r.watch.live) return
+  if (pvWant !== id || !box.isConnected) return
+  const w = r.watch
+  if (w?.members) {
+    // only members can watch it: say so on the tile, and leave it out of previews from now on
+    box.removeAttribute('data-pv')
+    if (!box.querySelector('.members-chip')) box.insertAdjacentHTML('beforeend', membersChip)
+    return
+  }
+  if (!w || !(w.live ? w.hls : w.video)) return log(`preview ${id}: ${r.error ?? 'nothing playable'}`)
   stopPreview()
   pvWant = id
   const el = document.createElement('video')
   el.muted = true
   el.playsInline = true
-  el.loop = false
   el.className = 'pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300'
   box.append(el)
-  const player = new Player(el, call, { ahead: 10, onError: () => stopPreview() })
-  pv = { id, el, player }
   el.addEventListener('playing', () => el.classList.remove('opacity-0'), { once: true })
-  try {
-    await player.load({ ...r.watch, audio: null }, 0)
-    if (pv?.el === el) await el.play()
-  } catch {
+  const fail = (e) => {
+    log(`preview ${id}: ${e?.message ?? e}`)
     if (pv?.el === el) stopPreview()
+  }
+  if (w.live) {
+    const h = new Hls({ loader: WorkerLoader, tubeKey: w.hls, enableWorker: false, liveSyncDurationCount: 2, maxBufferLength: 6, backBufferLength: 0 } as any)
+    pv = { id, el, stop: () => h.destroy() }
+    h.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+      // the smallest picture is plenty for a thumbnail
+      const low = data.levels.map((l, i) => [l.height || 1e4, i]).sort((x, y) => x[0] - y[0])[0]
+      if (low) (h.autoLevelCapping = low[1]), (h.nextLevel = low[1])
+      void el.play().catch(fail)
+    })
+    h.on(Hls.Events.ERROR, (_, d) => d.fatal && fail(new Error(d.details)))
+    h.attachMedia(el)
+    h.loadSource(LIVE_MASTER)
+    return
+  }
+  el.addEventListener('timeupdate', () => {
+    if (el.currentTime >= PREVIEW_SECONDS) el.currentTime = 0
+  })
+  const player = new Player(el, call, { ahead: 3, onError: fail })
+  pv = { id, el, stop: () => player.destroy() }
+  try {
+    await player.load({ ...w, audio: null }, 0)
+    if (pv?.el === el) await el.play()
+  } catch (e) {
+    fail(e)
   }
 }
 document.addEventListener('pointerover', (e) => {

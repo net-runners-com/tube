@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'ログイン',
+  'Members only': 'メンバー限定',
   'YouTube signed you out. Sign in again to see this.': 'YouTube からログアウトされました。表示するにはもう一度ログインしてください。',
   'Sign out': 'ログアウト',
   'Sign in to YouTube': 'YouTube にログイン',

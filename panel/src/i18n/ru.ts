@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Войти',
+  'Members only': 'Только для спонсоров',
   'YouTube signed you out. Sign in again to see this.': 'YouTube завершил ваш сеанс. Войдите снова, чтобы увидеть это.',
   'Sign out': 'Выйти',
   'Sign in to YouTube': 'Войти в YouTube',

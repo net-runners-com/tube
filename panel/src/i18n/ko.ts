@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': '로그인',
+  'Members only': '회원 전용',
   'YouTube signed you out. Sign in again to see this.': 'YouTube에서 로그아웃되었습니다. 보려면 다시 로그인하세요.',
   'Sign out': '로그아웃',
   'Sign in to YouTube': 'YouTube에 로그인',

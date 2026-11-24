@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Giriş yap',
+  'Members only': 'Yalnızca üyelere özel',
   'YouTube signed you out. Sign in again to see this.': 'YouTube oturumunuzu kapattı. Bunu görmek için yeniden giriş yapın.',
   'Sign out': 'Çıkış yap',
   'Sign in to YouTube': 'YouTube\'da giriş yap',

@@ -12,6 +12,8 @@ export type Video = {
   thumb: string
   /** a Short: shown as a vertical card */
   short?: boolean
+  /** only the channel's members can watch it */
+  members?: boolean
   /** YouTube's own view text when there is no count (Shorts search) */
   viewsText?: string
 }
@@ -48,6 +50,8 @@ export type Watch = {
   duration: number
   /** Most replayed: how often each slice of the video is watched, 0–1, oldest slice first (empty when YouTube has none). */
   heat: number[]
+  /** only the channel's members can watch it */
+  members: boolean
   /** Seek-bar previews: sheets of cols×rows frames, w×h each, one frame every `every` seconds. */
   board: Board | null
   uploaded: string

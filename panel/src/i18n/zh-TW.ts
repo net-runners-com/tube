@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': '登入',
+  'Members only': '會員專屬',
   'YouTube signed you out. Sign in again to see this.': 'YouTube 已將你登出。請重新登入後查看。',
   'Sign out': '登出',
   'Sign in to YouTube': '登入 YouTube',

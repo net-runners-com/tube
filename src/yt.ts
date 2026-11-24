@@ -137,6 +137,7 @@ export function toItem(e: any, fallback?: { channel?: string; channelId?: string
     duration: typeof e.duration === 'number' ? e.duration : null,
     views: e.view_count ?? e.concurrent_view_count ?? null,
     live: e.live_status === 'is_live' || (e.duration == null && e.concurrent_view_count != null),
+    ...(e.availability === 'subscriber_only' ? { members: true } : {}),
     thumb: thumbOf(e.id)
   }
 }

@@ -248,6 +248,7 @@ function countOf(s: string): number | null {
 }
 const clock = (t: string) => (/^(\d+:)?\d+:\d+$/.test(t) ? t.split(':').reduce((a, x) => a * 60 + Number(x), 0) : null)
 const LIVE = /LIVE|ライブ/i
+const MEMBERS = /Members only|メンバー限定/i
 
 /** A video tile in YouTube's newer lockup shape. */
 function fromLockup(l: any): Video | null {
@@ -268,6 +269,7 @@ function fromLockup(l: any): Video | null {
     duration: clock(badge),
     views: countOf(parts.find((p: string) => /view|視聴/i.test(p)) ?? ''),
     live: LIVE.test(badge),
+    ...([...findAll(l, 'badgeViewModel')].some((b: any) => MEMBERS.test(b.badgeText ?? '')) ? { members: true } : {}),
     thumb: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
   }
 }
@@ -286,6 +288,7 @@ function fromRenderer(r: any): Video | null {
     duration: r.lengthSeconds ? Number(r.lengthSeconds) : clock(text(r.lengthText)),
     views: countOf(text(r.viewCountText)),
     live,
+    ...((r.badges ?? []).some((b: any) => /MEMBERS_ONLY/.test(b.metadataBadgeRenderer?.style ?? '') || MEMBERS.test(b.metadataBadgeRenderer?.label ?? '')) ? { members: true } : {}),
     thumb: `https://i.ytimg.com/vi/${r.videoId}/mqdefault.jpg`
   }
 }

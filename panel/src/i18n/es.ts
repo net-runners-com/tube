@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Iniciar sesión',
+  'Members only': 'Solo para miembros',
   'YouTube signed you out. Sign in again to see this.': 'YouTube cerró tu sesión. Vuelve a iniciar sesión para ver esto.',
   'Sign out': 'Cerrar sesión',
   'Sign in to YouTube': 'Iniciar sesión en YouTube',
