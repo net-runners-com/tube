@@ -56,13 +56,20 @@ youtube.com page, no ads in the feed.
 
 <img src="assets/watch.jpg" alt="The watch page" width="100%">
 
-- Quality up to 1080p, speed, **captions** (uploaded and automatic), **picture-in-picture**.
+- Quality up to 1080p, speed, **captions** (uploaded and automatic).
 - **Live streams** with their **live chat**.
 - Like, subscribe, **add to your playlists**, copy the link, **download** to `~/Downloads`.
 - **Comments**, more from the channel, autoplay and loop.
 - **Audio tools**: boost the volume, transpose by semitones, retune the reference pitch, change
   the speed without changing the pitch.
 - A **mini player** that keeps playing while you browse.
+
+### 🪟 Picture-in-picture
+
+- Pop the video out into a **floating window** that stays on top of every app, and keep watching
+  while you code in Orca or anywhere else.
+- Tube's own controls in the window: play / pause, ±10 s, the seek bar — and captions stay on.
+- Works from the player, the mini player and Lofi mode; one click brings the video back.
 
 ### 🎨 Make it yours
 
