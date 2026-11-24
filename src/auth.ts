@@ -100,7 +100,10 @@ export async function innertube(endpoint: string, body: Record<string, unknown> 
   })
   if (r.status === 401 || r.status === 403) throw new Error('YouTube refused the session; sign in again')
   if (!r.ok) throw new Error(`YouTube ${endpoint}: HTTP ${r.status}`)
-  return r.json()
+  const j = await r.json()
+  // A session YouTube has ended still answers 200, as the signed-out page
+  if (j?.responseContext?.mainAppWebResponseContext?.loggedOut === true) throw new Error('YouTube signed this session out; sign in again')
+  return j
 }
 
 /** Depth-first search for every object stored under `key`. */
@@ -225,41 +228,92 @@ export async function playlistPage(id: string): Promise<{ title: string; videos:
   return { title: meta?.title ?? '', videos }
 }
 
-/** Home recommendations for the signed-in account (yt-dlp's :ytrec comes back empty). */
-export async function recommended() {
-  const j = await innertube('browse', { browseId: 'FEwhat_to_watch' })
-  const out: { kind: 'video'; id: string; title: string; channel: string; channelId: string; duration: number | null; views: number | null; live: boolean; thumb: string }[] = []
+/** Every object stored under any of `keys`, in document order. */
+function* findAny(node: any, keys: Set<string>): Generator<[string, any]> {
+  if (!node || typeof node !== 'object') return
+  if (Array.isArray(node)) {
+    for (const x of node) yield* findAny(x, keys)
+    return
+  }
+  for (const [k, v] of Object.entries(node)) {
+    if (keys.has(k)) yield [k, v]
+    else yield* findAny(v, keys)
+  }
+}
+
+const MULT: Record<string, number> = { K: 1e3, M: 1e6, B: 1e9, '万': 1e4, '億': 1e8 }
+function countOf(s: string): number | null {
+  const m = /([\d.,]+)\s*([KMB万億]?)/i.exec(s)
+  return m ? Math.round(Number(m[1].replace(/,/g, '')) * (MULT[m[2]?.toUpperCase()] ?? MULT[m[2]] ?? 1)) : null
+}
+const clock = (t: string) => (/^(\d+:)?\d+:\d+$/.test(t) ? t.split(':').reduce((a, x) => a * 60 + Number(x), 0) : null)
+const LIVE = /LIVE|ライブ/i
+
+/** A video tile in YouTube's newer lockup shape. */
+function fromLockup(l: any): Video | null {
+  if (l.contentType && l.contentType !== 'LOCKUP_CONTENT_TYPE_VIDEO') return null
+  const id = l.contentId as string
+  const meta = l.metadata?.lockupMetadataViewModel
+  // ad slots carry a video id but no title or channel: leave them out
+  if (!id || id.length !== 11 || !text(meta?.title)) return null
+  const parts = [...findAll(meta, 'metadataParts')].flat().map((p: any) => text(p.text))
+  const ch = [...findAll(meta, 'browseEndpoint')].find((b: any) => /^UC/.test(b.browseId ?? ''))
+  const badge = [...findAll(l, 'thumbnailBadgeViewModel')].map((b: any) => b.text ?? '').find((t: string) => /\d:\d/.test(t) || LIVE.test(t)) ?? ''
+  return {
+    kind: 'video',
+    id,
+    title: text(meta?.title),
+    channel: parts[0] ?? '',
+    channelId: ch?.browseId ?? '',
+    duration: clock(badge),
+    views: countOf(parts.find((p: string) => /view|視聴/i.test(p)) ?? ''),
+    live: LIVE.test(badge),
+    thumb: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
+  }
+}
+
+/** A video row in the older renderer shape (history, playlists, search-like lists). */
+function fromRenderer(r: any): Video | null {
+  if (!r?.videoId || !text(r.title)) return null
+  const by = (r.shortBylineText ?? r.longBylineText ?? r.ownerText)?.runs?.[0]
+  const live = (r.badges ?? []).some((b: any) => /LIVE/.test(b.metadataBadgeRenderer?.style ?? '')) || (!r.lengthText && !r.lengthSeconds && !!r.isPlayable)
+  return {
+    kind: 'video',
+    id: String(r.videoId),
+    title: text(r.title),
+    channel: by?.text ?? '',
+    channelId: by?.navigationEndpoint?.browseEndpoint?.browseId ?? '',
+    duration: r.lengthSeconds ? Number(r.lengthSeconds) : clock(text(r.lengthText)),
+    views: countOf(text(r.viewCountText)),
+    live,
+    thumb: `https://i.ytimg.com/vi/${r.videoId}/mqdefault.jpg`
+  }
+}
+
+const TILES = new Set(['lockupViewModel', 'videoRenderer', 'gridVideoRenderer', 'playlistVideoRenderer'])
+/** The videos on one of the account's pages (Home, Subscriptions, History, a playlist), first page. */
+export async function browseVideos(browseId: string): Promise<Video[]> {
+  const j = await innertube('browse', { browseId })
+  const out: Video[] = []
   const seen = new Set<string>()
-  for (const l of findAll(j, 'lockupViewModel')) {
-    if (l.contentType && l.contentType !== 'LOCKUP_CONTENT_TYPE_VIDEO') continue
-    const id = l.contentId as string
-    if (!id || seen.has(id) || id.length !== 11) continue
-    const meta = l.metadata?.lockupMetadataViewModel
-    // ad slots carry a video id but no title or channel: leave them out
-    if (!text(meta?.title)) continue
-    seen.add(id)
-    const rows = [...findAll(meta, 'metadataParts')].flat()
-    const parts = rows.map((p: any) => text(p.text))
-    const ch = [...findAll(meta, 'browseEndpoint')].find((b: any) => /^UC/.test(b.browseId ?? ''))
-    const badge = [...findAll(l, 'thumbnailBadgeViewModel')].map((b: any) => b.text ?? '').find((t: string) => /\d:\d/.test(t) || /LIVE|ライブ/i.test(t)) ?? ''
-    const dur = /^(\d+:)?\d+:\d+$/.test(badge) ? badge.split(':').reduce((a: number, x: string) => a * 60 + Number(x), 0) : null
-    const viewsText = parts.find((p: string) => /view|視聴/i.test(p)) ?? ''
-    const vm = /([\d.,]+)\s*([KMB万億]?)/i.exec(viewsText)
-    const mult: Record<string, number> = { K: 1e3, M: 1e6, B: 1e9, '万': 1e4, '億': 1e8 }
-    out.push({
-      kind: 'video',
-      id,
-      title: text(meta?.title),
-      channel: parts[0] ?? '',
-      channelId: ch?.browseId ?? '',
-      duration: dur,
-      views: vm ? Math.round(Number(vm[1].replace(/,/g, '')) * (mult[vm[2]?.toUpperCase()] ?? mult[vm[2]] ?? 1)) : null,
-      live: /LIVE|ライブ/i.test(badge),
-      thumb: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
-    })
+  for (const [k, v] of findAny(j, TILES)) {
+    const vid = k === 'lockupViewModel' ? fromLockup(v) : fromRenderer(v)
+    if (vid && !seen.has(vid.id)) seen.add(vid.id), out.push(vid)
   }
   return out
 }
+
+/** The account's feeds, read with the session like YouTube's own pages (yt-dlp's cookie reads get 401). */
+export type Feed = 'recommended' | 'subscriptions' | 'history' | 'watchlater' | 'liked'
+const FEED_IDS: Record<Feed, string> = {
+  recommended: 'FEwhat_to_watch',
+  subscriptions: 'FEsubscriptions',
+  history: 'FEhistory',
+  watchlater: 'VLWL',
+  liked: 'VLLL'
+}
+export const feed = (kind: Feed) => browseVideos(FEED_IDS[kind])
+export const recommended = () => feed('recommended')
 
 export type Rating = 'like' | 'dislike' | 'none'
 export async function rate(videoId: string, rating: Rating) {

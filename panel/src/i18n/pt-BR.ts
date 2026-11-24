@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Fazer login',
+  'YouTube signed you out. Sign in again to see this.': 'O YouTube encerrou sua sessão. Entre novamente para ver isto.',
   'Sign out': 'Sair',
   'Sign in to YouTube': 'Fazer login no YouTube',
   'Not signed in': 'Sem login',

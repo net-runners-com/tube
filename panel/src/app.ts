@@ -305,8 +305,14 @@ function toast(text: string, kind: 'info' | 'success' | 'error' = 'info') {
 
 /* ---------------- shared pieces ---------------- */
 const spinner = () => `<div class="grid place-items-center py-16"><div class="spinner"></div></div>`
-const errorBox = (msg, retry) =>
-  `<div class="mx-5 my-10 rounded-2xl bg-panel p-5 text-center text-[12.5px] text-[#ccc]"><p>${esc(msg)}</p>${retry ? `<button data-act="${retry}" class="mt-4 rounded-xl bg-brand px-4 py-2 text-[12px] font-bold text-white">Retry</button>` : ''}</div>`
+// A sign-in error (expired session, or yt-dlp asking for login) offers Sign in instead of Retry.
+const SIGNED_OUT = /sign in again|Sign in first|Login details are needed|cookies-from-browser/i
+const errorBox = (msg, retry) => {
+  const out = SIGNED_OUT.test(msg)
+  const text = out ? 'YouTube signed you out. Sign in again to see this.' : msg
+  const act = out ? 'relogin' : retry
+  return `<div class="mx-5 my-10 rounded-2xl bg-panel p-5 text-center text-[12.5px] text-[#ccc]"><p>${esc(text)}</p>${act ? `<button data-act="${act}" class="mt-4 rounded-xl bg-brand px-4 py-2 text-[12px] font-bold text-white">${out ? 'Sign in' : 'Retry'}</button>` : ''}</div>`
+}
 /* Skeletons: grey blocks shaped like what is loading (the .sk shimmer lives in tailwind.css). */
 const SK = {
   big: (n = 3) => Array.from({ length: n }, () => `<div><div class="sk aspect-video w-full rounded-[18px]"></div><div class="mt-3 flex gap-2.5"><div class="sk h-6 w-6 shrink-0 rounded-full"></div><div class="flex-1 space-y-2 pt-0.5"><div class="sk h-3 w-[85%] rounded"></div><div class="sk h-2.5 w-[45%] rounded"></div></div></div></div>`).join(''),
@@ -2589,6 +2595,11 @@ document.addEventListener('click', (e) => {
       return closeSheet()
     case 'login':
       return void beginLogin()
+    case 'relogin':
+      S.account = null
+      store.set('account', null)
+      openSheet()
+      return void beginLogin()
     case 'cancelLogin':
       S.login = null
       void call('auth.cancel')
@@ -3117,7 +3128,7 @@ syncPlayButtons()
   S.subs = S.account ? got.subsAccount : got.subs
   // Check the session in the background; the cached account paints first.
   void call('auth.account').then(async (r) => {
-    if (r.error && !/sign in again|Sign in first/i.test(r.error)) return // offline etc.: keep the cached account
+    if (r.error && !SIGNED_OUT.test(r.error)) return // offline etc.: keep the cached account
     const was = !!S.account
     S.account = r.account ?? null
     store.set('account', S.account)

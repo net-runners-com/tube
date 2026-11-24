@@ -92,20 +92,6 @@ export async function ytdlp(args: string[], { timeoutMs = 40_000, cookies = true
   )
 }
 
-/** Account feeds (need cookies): recommendations, subscriptions, history, watch later, likes. */
-export type Feed = 'recommended' | 'subscriptions' | 'history' | 'watchlater' | 'liked'
-const FEEDS: Record<Feed, string> = {
-  recommended: ':ytrec',
-  subscriptions: ':ytsubs',
-  history: ':ythis',
-  watchlater: ':ytwatchlater',
-  liked: 'https://www.youtube.com/playlist?list=LL'
-}
-export async function feed(kind: Feed, limit = 30): Promise<Video[]> {
-  const j = await ytdlp(['--flat-playlist', '--playlist-end', String(limit), FEEDS[kind]])
-  return (j.entries ?? []).map((e: any) => toItem(e)).filter((x: Item | null): x is Video => x?.kind === 'video')
-}
-
 export const thumbOf = (id: string) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
 /** Shorts: the original (vertical) aspect ratio */
 export const shortThumb = (id: string) => `https://i.ytimg.com/vi/${id}/oar2.jpg`

@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Anmelden',
+  'YouTube signed you out. Sign in again to see this.': 'YouTube hat dich abgemeldet. Melde dich erneut an, um dies zu sehen.',
   'Sign out': 'Abmelden',
   'Sign in to YouTube': 'Bei YouTube anmelden',
   'Not signed in': 'Nicht angemeldet',

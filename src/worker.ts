@@ -8,7 +8,7 @@ import { copyText, downloadsDir, reveal } from './platform'
 import * as tools from './tools'
 import { updateTube } from './update'
 import { chatPoll, chatStart } from './chat'
-import { channel, channelAvatar, comments, downloadState, playlistVideos, startDownload, type Caption, parseJson3, pickCaptions, type ChannelTab, feed, type Feed, pickFormats, search, type SearchOpts, type Track, type Watch, ytdlp, YTDLP, thumbOf } from './yt'
+import { channel, channelAvatar, comments, downloadState, playlistVideos, startDownload, type Caption, parseJson3, pickCaptions, type ChannelTab, pickFormats, search, type SearchOpts, type Track, type Watch, ytdlp, YTDLP, thumbOf } from './yt'
 
 /** Panel answers are capped at 1 MiB of JSON: 720 KB of bytes is 960 KB of base64. */
 const CHUNK = 720_000
@@ -322,10 +322,10 @@ export default function activate(orca: OrcaWorkerApi): void {
       return fail(e)
     }
   })
-  handle('yt.feed', async ({ kind, fresh }: { kind: Feed; fresh?: boolean }) => {
+  handle('yt.feed', async ({ kind, fresh }: { kind: auth.Feed; fresh?: boolean }) => {
     try {
       if (fresh) listCache.delete('feed:' + kind)
-      return { items: await cached('feed:' + kind, kind === 'history' ? 60_000 : LIST_TTL, () => (kind === 'recommended' ? auth.recommended() : feed(kind))) }
+      return { items: await cached('feed:' + kind, kind === 'history' ? 60_000 : LIST_TTL, () => auth.feed(kind)) }
     } catch (e) {
       return fail(e)
     }

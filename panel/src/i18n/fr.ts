@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': 'Se connecter',
+  'YouTube signed you out. Sign in again to see this.': 'YouTube vous a déconnecté. Reconnectez-vous pour voir ceci.',
   'Sign out': 'Se déconnecter',
   'Sign in to YouTube': 'Se connecter à YouTube',
   'Not signed in': 'Non connecté',

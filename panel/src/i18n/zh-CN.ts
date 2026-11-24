@@ -203,6 +203,7 @@ export default {
 
   // account
   'Sign in': '登录',
+  'YouTube signed you out. Sign in again to see this.': 'YouTube 已将你退出登录。请重新登录后查看。',
   'Sign out': '退出登录',
   'Sign in to YouTube': '登录 YouTube',
   'Not signed in': '未登录',
