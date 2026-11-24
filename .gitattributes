@@ -1,1 +1,5 @@
 * -text
+panel/app.js linguist-generated
+panel/pitch-worklet.js linguist-generated
+panel/app.css linguist-generated
+panel/vendor/** linguist-vendored
