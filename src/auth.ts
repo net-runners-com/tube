@@ -237,8 +237,10 @@ export async function recommended() {
     if (l.contentType && l.contentType !== 'LOCKUP_CONTENT_TYPE_VIDEO') continue
     const id = l.contentId as string
     if (!id || seen.has(id) || id.length !== 11) continue
-    seen.add(id)
     const meta = l.metadata?.lockupMetadataViewModel
+    // ad slots carry a video id but no title or channel: leave them out
+    if (!text(meta?.title)) continue
+    seen.add(id)
     const rows = [...findAll(meta, 'metadataParts')].flat()
     const parts = rows.map((p: any) => text(p.text))
     const ch = [...findAll(meta, 'browseEndpoint')].find((b: any) => /^UC/.test(b.browseId ?? ''))
