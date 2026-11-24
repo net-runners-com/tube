@@ -23,6 +23,18 @@ body { font-family: "Google Sans", "Product Sans", -apple-system, BlinkMacSystem
 /* player controls hide while playing unless the pointer moved recently */
 #stage.playing:not(.awake):not(.menu) #controls, #stage.playing:not(.awake):not(.menu) #shade { opacity: 0; }
 #stage.playing:not(.awake) { cursor: none; }
+/* Seek bar: a thin line at rest; with the controls up it thickens and shows its knob; hovering it shows
+   the time under the pointer and, when YouTube has it, the most-replayed graph. */
+.seek-track { height: 3px; transition: height .15s; }
+#stage.awake .seek-track, #stage:not(.playing) .seek-track { height: 5px; }
+#seekbar:hover .seek-track, #seekbar.drag .seek-track { height: 7px; }
+.seek-knob { opacity: 0; transition: opacity .15s, transform .15s; }
+#stage.awake .seek-knob, #stage:not(.playing) .seek-knob, #seekbar.drag .seek-knob { opacity: 1; }
+#seekbar:hover .seek-knob, #seekbar.drag .seek-knob { transform: translateX(-50%) scale(1.25); }
+#heat, #seekTip, #pHover { opacity: 0; transition: opacity .15s; }
+#seekbar:hover #heat, #seekbar.drag #heat, #seekbar:hover #seekTip, #seekbar.drag #seekTip, #seekbar:hover #pHover { opacity: 1; }
+#stage.asleep:not(.menu) #controls, #stage.asleep:not(.menu) #shade { opacity: 0; }
+#stage.asleep:not(.menu) #controls { pointer-events: none; }
 #stage:fullscreen { border-radius: 0; }
 #stage:fullscreen video { object-fit: contain; }
 button { cursor: pointer; }
@@ -51,8 +63,8 @@ button { cursor: pointer; }
 .sticky-head.clear.scrolled .head-title { opacity: 1; }
 
 /* player: volume slider and captions */
-.vol-slider { -webkit-appearance: none; appearance: none; height: 3px; border-radius: 3px; background: rgba(255,255,255,.35); accent-color: #fff; cursor: pointer; }
-.vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 9999px; background: #fff; }
+.vol-slider { -webkit-appearance: none; appearance: none; height: 5px; border-radius: 3px; background: rgba(255,255,255,.35); accent-color: #fff; cursor: pointer; }
+.vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.5); border-radius: 9999px; background: #fff; }
 video::cue { background: rgba(0,0,0,.72); color: #fff; font-size: 15px; line-height: 1.35; font-family: "Hiragino Sans", "Google Sans", system-ui, sans-serif; }
 .clamp4 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
 .knob { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 4px; background: rgb(var(--line)); cursor: pointer; }

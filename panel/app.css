@@ -616,12 +616,24 @@ video {
   bottom: 1rem;
 }
 
+.bottom-\[-4\.5px\] {
+  bottom: -4.5px;
+}
+
 .bottom-\[12px\] {
   bottom: 12px;
 }
 
+.bottom-\[42px\] {
+  bottom: 42px;
+}
+
 .bottom-\[50px\] {
   bottom: 50px;
+}
+
+.bottom-\[5px\] {
+  bottom: 5px;
 }
 
 .left-0 {
@@ -938,6 +950,10 @@ video {
   height: 12px;
 }
 
+.h-\[13px\] {
+  height: 13px;
+}
+
 .h-\[14px\] {
   height: 14px;
 }
@@ -952,6 +968,10 @@ video {
 
 .h-\[30px\] {
   height: 30px;
+}
+
+.h-\[34px\] {
+  height: 34px;
 }
 
 .h-\[360px\] {
@@ -1114,6 +1134,10 @@ video {
   width: 106px;
 }
 
+.w-\[13px\] {
+  width: 13px;
+}
+
 .w-\[18px\] {
   width: 18px;
 }
@@ -1228,6 +1252,11 @@ video {
 
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.-translate-x-1\/2 {
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .rotate-180 {
@@ -1753,6 +1782,10 @@ video {
 
 .bg-white\/30 {
   background-color: rgb(255 255 255 / 0.3);
+}
+
+.bg-white\/40 {
+  background-color: rgb(255 255 255 / 0.4);
 }
 
 .bg-white\/50 {
@@ -2452,6 +2485,12 @@ video {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.shadow-\[0_1px_4px_rgba\(0\2c 0\2c 0\2c \.5\)\] {
+  --tw-shadow: 0 1px 4px rgba(0,0,0,.5);
+  --tw-shadow-colored: 0 1px 4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
 .shadow-\[0_22px_60px_rgba\(0\2c 0\2c 0\2c \.6\)\2c 0_2px_0_rgba\(255\2c 255\2c 255\2c \.6\)_inset\] {
   --tw-shadow: 0 22px 60px rgba(0,0,0,.6),0 2px 0 rgba(255,255,255,.6) inset;
   --tw-shadow-colored: 0 22px 60px var(--tw-shadow-color), inset 0 2px 0 var(--tw-shadow-color);
@@ -2580,6 +2619,10 @@ video {
   transition-duration: 300ms;
 }
 
+.\[text-shadow\:0_1px_3px_rgba\(0\2c 0\2c 0\2c \.8\)\] {
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+
 /* Source for panel/app.css: `scripts/build-css.sh` rebuilds it. */
 
 :root {
@@ -2697,6 +2740,52 @@ body {
 
 #stage.playing:not(.awake) {
   cursor: none;
+}
+
+/* Seek bar: a thin line at rest; with the controls up it thickens and shows its knob; hovering it shows
+   the time under the pointer and, when YouTube has it, the most-replayed graph. */
+
+.seek-track {
+  height: 3px;
+  transition: height .15s;
+}
+
+#stage.awake .seek-track, #stage:not(.playing) .seek-track {
+  height: 5px;
+}
+
+#seekbar:hover .seek-track, #seekbar.drag .seek-track {
+  height: 7px;
+}
+
+.seek-knob {
+  opacity: 0;
+  transition: opacity .15s, transform .15s;
+}
+
+#stage.awake .seek-knob, #stage:not(.playing) .seek-knob, #seekbar.drag .seek-knob {
+  opacity: 1;
+}
+
+#seekbar:hover .seek-knob, #seekbar.drag .seek-knob {
+  transform: translateX(-50%) scale(1.25);
+}
+
+#heat, #seekTip, #pHover {
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+#seekbar:hover #heat, #seekbar.drag #heat, #seekbar:hover #seekTip, #seekbar.drag #seekTip, #seekbar:hover #pHover {
+  opacity: 1;
+}
+
+#stage.asleep:not(.menu) #controls, #stage.asleep:not(.menu) #shade {
+  opacity: 0;
+}
+
+#stage.asleep:not(.menu) #controls {
+  pointer-events: none;
 }
 
 #stage:fullscreen {
@@ -2819,7 +2908,7 @@ button {
   -webkit-appearance: none;
   -moz-appearance: none;
        appearance: none;
-  height: 3px;
+  height: 5px;
   border-radius: 3px;
   background: rgba(255,255,255,.35);
   accent-color: #fff;
@@ -2828,8 +2917,9 @@ button {
 
 .vol-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.5);
   border-radius: 9999px;
   background: #fff;
 }

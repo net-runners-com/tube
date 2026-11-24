@@ -142,6 +142,7 @@ async function resolveWatch(id: string, maxHeight: number, ck: string): Promise<
     views: j.view_count ?? null,
     likes: j.like_count ?? null,
     duration: j.duration ?? 0,
+    heat: Array.isArray(j.heatmap) ? j.heatmap.map((h: any) => Math.round((h.value ?? 0) * 100) / 100) : [],
     uploaded: j.upload_date ?? '',
     thumb: thumbOf(id),
     live,

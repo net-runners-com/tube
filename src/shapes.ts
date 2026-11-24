@@ -46,6 +46,8 @@ export type Watch = {
   views: number | null
   likes: number | null
   duration: number
+  /** Most replayed: how often each slice of the video is watched, 0–1, oldest slice first (empty when YouTube has none). */
+  heat: number[]
   uploaded: string
   thumb: string
   live: boolean

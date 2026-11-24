@@ -1025,13 +1025,33 @@ video.addEventListener('timeupdate', () => {
     $('#tCur').innerHTML = `<span class="mr-1 inline-block h-1.5 w-1.5 rounded-full ${behind < 20 ? 'bg-brand' : 'bg-white/50'} align-middle"></span>LIVE`
     $('#tDur').textContent = behind >= 20 ? `-${clock(behind)}` : ''
     $('#pCur').style.width = '100%'
+    $('#pKnob').style.left = '100%'
     return
   }
   const d = S.watch?.duration || video.duration || 0
   $('#tCur').textContent = clock(video.currentTime)
   $('#tDur').textContent = clock(d)
-  $('#pCur').style.width = d ? `${(video.currentTime / d) * 100}%` : '0'
+  const pct = d ? `${(video.currentTime / d) * 100}%` : '0'
+  $('#pCur').style.width = pct
+  $('#pKnob').style.left = pct
+  if (heatFor !== S.watch?.id) drawHeat()
 })
+/* Most replayed: YouTube's per-slice watch counts as a soft curve over the seek bar. */
+let heatFor = ''
+function drawHeat() {
+  heatFor = S.watch?.id ?? ''
+  const v = S.watch?.heat ?? []
+  const path = $('#heat path')
+  if (v.length < 2) return path.setAttribute('d', '')
+  const x = (i) => (i / (v.length - 1)) * 1000
+  const y = (i) => 100 - v[i] * 92
+  let d = `M0 100 L0 ${y(0)}`
+  for (let i = 1; i < v.length; i++) {
+    const cx = (x(i - 1) + x(i)) / 2
+    d += ` C${cx} ${y(i - 1)} ${cx} ${y(i)} ${x(i)} ${y(i)}`
+  }
+  path.setAttribute('d', d + ' L1000 100 Z')
+}
 
 /* ---------------- live (HLS through the worker) ---------------- */
 // hls.js does the playlists and TS→MP4; every request goes through this loader to the worker,
@@ -2371,12 +2391,22 @@ function mediaSession(w) {
 // Controls fade while playing; any pointer move brings them back.
 let hideTimer
 function wake() {
+  $('#stage').classList.remove('asleep')
   $('#stage').classList.add('awake')
   clearTimeout(hideTimer)
   hideTimer = setTimeout(() => $('#stage').classList.remove('awake'), 2600)
 }
 $('#stage').addEventListener('pointermove', wake)
 $('#stage').addEventListener('pointerdown', wake)
+// A press anywhere outside the player puts its controls (and the volume slider) away at once.
+document.addEventListener('pointerdown', (e) => {
+  const stage = $('#stage')
+  if (stage.contains(tg(e)) || tg(e).closest?.('#pmenu')) return
+  clearTimeout(hideTimer)
+  stage.classList.remove('awake')
+  stage.classList.add('asleep')
+  if (document.activeElement === $('#volSlider')) $('#volSlider').blur()
+}, true)
 
 function seekFromEvent(e) {
   const r = $('#seekbar').getBoundingClientRect()
@@ -2384,13 +2414,26 @@ function seekFromEvent(e) {
   if (!d) return
   video.currentTime = Math.max(0, Math.min(d - 0.5, ((e.clientX - r.left) / r.width) * d))
 }
+// Hover: the time under the pointer, kept inside the player's edges.
+$('#seekbar').addEventListener('pointermove', (e) => {
+  const r = $('#seekbar').getBoundingClientRect()
+  const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
+  const d = S.watch?.duration || video.duration || 0
+  const tip = $('#seekTip')
+  tip.textContent = clock(f * d)
+  const half = tip.offsetWidth / 2 + 6
+  tip.style.left = `${Math.max(half, Math.min(r.width - half, f * r.width))}px`
+  $('#pHover').style.width = `${f * 100}%`
+})
 $('#seekbar').addEventListener('pointerdown', (e) => {
   e.stopPropagation()
-  $('#seekbar').setPointerCapture(e.pointerId)
+  const bar = $('#seekbar')
+  bar.setPointerCapture(e.pointerId)
+  bar.classList.add('drag')
   seekFromEvent(e)
   const move = (ev) => seekFromEvent(ev)
-  $('#seekbar').addEventListener('pointermove', move)
-  $('#seekbar').addEventListener('pointerup', () => $('#seekbar').removeEventListener('pointermove', move), { once: true })
+  bar.addEventListener('pointermove', move)
+  bar.addEventListener('pointerup', () => (bar.removeEventListener('pointermove', move), bar.classList.remove('drag')), { once: true })
 })
 
 /* Sticky headers get a hairline once the page scrolls; the channel one turns from clear to solid. */
