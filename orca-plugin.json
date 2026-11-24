@@ -1,0 +1,33 @@
+{
+  "manifestVersion": 2,
+  "id": "tube",
+  "name": "Tube",
+  "version": "1.0.0",
+  "description": "Browse and watch YouTube in a sidebar panel. The worker talks to YouTube through yt-dlp; the panel streams video with Media Source.",
+  "engines": {
+    "orca": ">=1.4.246"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "src/worker.ts",
+  "contributes": {
+    "panels": [
+      {
+        "id": "tube",
+        "title": "Tube",
+        "icon": "play",
+        "entry": "panel/index.html"
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "kind": "storage:own"
+    }
+  ],
+  "author": {
+    "name": "net-runners-com",
+    "url": "https://github.com/net-runners-com"
+  },
+  "repository": "https://github.com/net-runners-com/tube"
+}

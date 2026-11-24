@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Source for panel/app.css: `scripts/build-css.sh` rebuilds it. */
+:root { --zoom: 1; --ink: 22 22 22; --panel: 32 32 32; --surface: 44 44 44; --line: 58 58 58; --brand: 227 38 43; --mute: 154 154 154; }
+html, body { background: rgb(var(--ink)); color-scheme: dark; }
+body { font-family: "Google Sans", "Product Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+.logo { font-family: "Oswald", "Avenir Next Condensed", "Arial Narrow", sans-serif; letter-spacing: -0.5px; }
+.no-sb::-webkit-scrollbar { display: none; }
+.no-sb { scrollbar-width: none; }
+.view { display: none; }
+.view.active { display: block; }
+.clamp2, .clamp3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp2 { -webkit-line-clamp: 2; }
+.clamp3 { -webkit-line-clamp: 3; }
+.tab-active { color: #fff; font-weight: 700; position: relative; }
+.tab-active::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 14px; height: 3px; border-radius: 3px; background: rgb(var(--brand)); transform: translateX(-50%); }
+.notch { position: absolute; right: 10px; bottom: -6px; width: 20px; height: 20px; border-radius: 9999px; background: rgb(var(--ink)); display: grid; place-items: center; }
+.notch::after { content: ''; width: 11px; height: 11px; border-radius: 9999px; background: rgb(var(--brand)); }
+.spinner { width: 28px; height: 28px; border-radius: 9999px; border: 3px solid rgba(255,255,255,.15); border-top-color: rgb(var(--brand)); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* player controls hide while playing unless the pointer moved recently */
+#stage.playing:not(.awake):not(.menu) #controls, #stage.playing:not(.awake):not(.menu) #shade { opacity: 0; }
+#stage.playing:not(.awake) { cursor: none; }
+#stage:fullscreen { border-radius: 0; }
+#stage:fullscreen video { object-fit: contain; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* search overlay + account sheet transitions */
+#searchOverlay .so-backdrop, #sheet .sheet-backdrop { opacity: 0; transition: opacity .18s ease; }
+#searchOverlay .so-bar { opacity: 0; transform: translateY(-14px) scale(.96); transition: transform .22s cubic-bezier(.2,.9,.3,1.2), opacity .16s ease; }
+#searchOverlay .so-list { opacity: 0; transform: translateY(-6px); transition: transform .2s ease .05s, opacity .2s ease .05s; }
+#searchOverlay.open .so-backdrop, #sheet.open .sheet-backdrop { opacity: 1; }
+#searchOverlay.open .so-bar, #searchOverlay.open .so-list { opacity: 1; transform: none; }
+#sheet .sheet-card { transform: translateY(100%); transition: transform .24s cubic-bezier(.2,.9,.3,1); }
+#sheet.open .sheet-card { transform: none; }
+
+/* horizontal rows: fade the right edge instead of a hard cut, so it reads as scrollable */
+.fade-x { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 28px; }
+
+/* sticky page headers */
+.sticky-head { position: sticky; top: 0; z-index: 15; background: rgb(var(--ink) / .9); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transition: background .2s, box-shadow .2s; }
+.sticky-head.scrolled { box-shadow: 0 1px 0 rgba(255,255,255,.07); }
+.sticky-head.clear:not(.scrolled) { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.sticky-head.clear .head-title { opacity: 0; transition: opacity .2s; }
+.sticky-head.clear.scrolled .head-title { opacity: 1; }
+
+/* player: volume slider and captions */
+.vol-slider { -webkit-appearance: none; appearance: none; height: 3px; border-radius: 3px; background: rgba(255,255,255,.35); accent-color: #fff; cursor: pointer; }
+.vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 9999px; background: #fff; }
+video::cue { background: rgba(0,0,0,.72); color: #fff; font-size: 15px; line-height: 1.35; font-family: "Hiragino Sans", "Google Sans", system-ui, sans-serif; }
+.clamp4 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.knob { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 4px; background: rgb(var(--line)); cursor: pointer; }
+.knob::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 9999px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+/* Layout settings (classes on <html>, set from Settings > Layout) */
+#app { zoom: var(--zoom); }
+.hide-tools #tools, .hide-actions #watchActions, .hide-comments #comments, .hide-related #watchMore, .hide-labels .nav-label, .hide-chips #homeChips { display: none !important; }
+.corners-small #app [class*="rounded-"]:not(.rounded-full) { border-radius: 8px !important; }
+.corners-square #app [class*="rounded"] { border-radius: 0 !important; }
+.corners-square .vol-slider, .corners-square .knob { border-radius: 0; }
+
+/* skeletons: shimmering blocks while content loads; images shimmer until their bytes arrive */
+.sk, img[data-img]:not([src]) {
+  background: linear-gradient(90deg, rgb(var(--surface)) 30%, rgb(var(--line)) 50%, rgb(var(--surface)) 70%);
+  background-size: 300% 100%;
+  animation: sk 1.4s ease-in-out infinite;
+}
+@keyframes sk { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .sk, img[data-img]:not([src]) { animation: none; } }
+
+/* mini player seek bar */
+.mini-seek { -webkit-appearance: none; appearance: none; width: 100%; height: 3px; border-radius: 3px; background: rgb(var(--line)); cursor: pointer; }
+.mini-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 9999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.5); }
+
+/* Lofi: the watch page as a music player (glass over the thumbnail's colors) */
+#v-watch.lofi #comments, #v-watch.lofi #watchMore { display: none; }
+#v-watch.lofi #stage, #v-watch.lofi #watchInfo { position: absolute !important; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+#v-watch.lofi #watchCard { background: transparent; }
+#lofi { --lofi-a: 107 47 63; --lofi-b: 28 20 36; }
+#lofi .lofi-bg { background: linear-gradient(to bottom, rgb(var(--lofi-a)), rgb(var(--lofi-b)) 75%); transition: background .6s; }
+#lofi .lofi-blur { transform: scale(1.25) translateZ(0); opacity: .55; filter: blur(50px) saturate(1.5); }
+.glass { background: linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.06)); border: 1px solid rgba(255,255,255,.22); -webkit-backdrop-filter: blur(22px) saturate(160%); backdrop-filter: blur(22px) saturate(160%); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.18); }
+.glass-dark { background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); border: 1px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+.glass-tint { background: linear-gradient(135deg, rgba(240,122,58,.55), rgba(139,71,230,.35)); border: 1px solid rgba(255,255,255,.25); -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.lyric-hi { background: linear-gradient(90deg, #f0a23a, #e05bd0 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lofi-seek { --p: 0%; -webkit-appearance: none; appearance: none; height: 12px; border-radius: 9999px; cursor: pointer;
+  background: linear-gradient(90deg, #8b47e6, #c35a8e calc(var(--p) * .6), #f07a3a var(--p), rgba(255,255,255,.12) var(--p));
+  border: 1px solid rgba(255,255,255,.18); }
+.lofi-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 9999px; background: #ec7a3c; box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 0 16px 4px rgba(240,122,58,.55); }
+.lyrics-collapse { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease; }
+.lyrics-collapse.open { grid-template-rows: 1fr; opacity: 1; }
+#lofiAudio #audioCards { padding: 0; }
+#lofiAudio #audioCards .bg-surface { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+/* Lofi: the player's controls on the card, shown on hover (or while its menu is open) */
+#lofiVideo #controls, #lofiVideo #shade { opacity: 0; transition: opacity .2s; }
+#lofiVideo:hover #controls, #lofiVideo:hover #shade, #lofiVideo:has(#pmenu:not([hidden])) #controls, #lofiVideo:has(#pmenu:not([hidden])) #shade { opacity: 1; }
+#lofiVideo #controls { background: linear-gradient(to bottom, rgba(0,0,0,.35), transparent 30%, transparent 65%, rgba(0,0,0,.45)); }
+/* Lofi fills the page down to the bottom bar, so its background never stops halfway */
+/* exactly the visible area above the bottom bar (#app reserves 96px for it; #app zoom scales vh) */
+#v-watch.lofi #lofi { min-height: calc(100vh / var(--zoom) - 96px); border-radius: 0; }
+#v-watch.lofi #watchCard { height: 0; overflow: hidden; border-radius: 0; }
+/* Lofi card: floats off the background (soft-UI shadow, stronger), thumbnail layer on demand */
+.lofi-card {
+  border-radius: 22px;
+  background: rgb(var(--lofi-a));
+  /* the given soft-UI shadows, in colors that work on any background: dark below-right, light above-left */
+  box-shadow: 20px 20px 60px rgba(0,0,0,.85),
+              -20px -20px 60px rgba(255,255,255,.35),
+              0 26px 34px -12px rgba(0,0,0,.85),
+              0 3px 8px rgba(0,0,0,.45);
+  transform: translateY(-6px);
+}
+#lofiVideo .lofi-art { opacity: 0; }
+#lofiVideo.show-art .lofi-art { opacity: 1; }
+#lofiVideo #controls, #lofiVideo #shade { z-index: 2; }
+/* no backdrop blur inside Lofi: the background is already a soft blur, and re-blurring it while the
+   visualizer redraws every frame made the glass flicker */
+#lofi .glass, #lofi .glass-dark, #lofi .glass-tint, #lofiAudio #audioCards .bg-surface { -webkit-backdrop-filter: none; backdrop-filter: none; }
+#lofi .glass-dark { background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); }
+#lofi .lofi-bg, #lofi .lofi-blur { will-change: transform; }
+#lofiViz { will-change: transform; }
+/* the red dot marks a live stream: it pulses */
+.notch::after { animation: live-pulse 1.6s ease-in-out infinite; }
+@keyframes live-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--brand) / .6); } 50% { box-shadow: 0 0 0 5px rgb(var(--brand) / 0); } }
+/* now-playing equalizer in Up Next */
+.eq i { display: block; width: 3px; border-radius: 2px; background: #7ee0a0; animation: eq 0.9s ease-in-out infinite; }
+.eq i:nth-child(1) { height: 60%; animation-delay: -.3s; }
+.eq i:nth-child(2) { height: 100%; animation-delay: -.6s; }
+.eq i:nth-child(3) { height: 45%; }
+.paused .eq i { animation-play-state: paused; }
+@keyframes eq { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+.eq i { transform-origin: bottom; }
+.lofi-pills > button { flex-shrink: 0; padding: 7px 11px; gap: 6px; border-radius: 12px; }
+.lofi-pills svg { width: 15px; height: 15px; }
