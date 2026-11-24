@@ -1,6 +1,6 @@
 const v = (name) => `rgb(var(--${name}) / <alpha-value>)`
 module.exports = {
-  content: ['./panel/index.html', './panel/app.js'],
+  content: ['./panel/index.html', './panel/src/**/*.ts'],
   theme: {
     extend: {
       // theme tokens are CSS variables (space-separated RGB), set by the Theme settings

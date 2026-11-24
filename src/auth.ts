@@ -5,6 +5,7 @@
 // "Sign in with Google" opens a separate Chrome profile with the DevTools port on, waits for the
 // login cookies to appear, reads them over CDP (no keychain prompt) and closes that window.
 import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
+import type { Video } from './shapes'
 import { createHash } from 'node:crypto'
 import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
@@ -206,7 +207,7 @@ export async function myPlaylists(): Promise<{ id: string; title: string; count:
   return out
 }
 /** One playlist's videos (private ones too), first page (about 100). */
-export async function playlistPage(id: string) {
+export async function playlistPage(id: string): Promise<{ title: string; videos: Video[] }> {
   const j = await innertube('browse', { browseId: `VL${id}` })
   const meta = [...findAll(j, 'playlistMetadataRenderer')][0]
   const videos = [...findAll(j, 'playlistVideoRenderer')]

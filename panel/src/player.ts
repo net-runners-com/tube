@@ -79,9 +79,23 @@ function rangeAt(sb, t) {
 
 const once = (target, ev) => new Promise((r) => target.addEventListener(ev, r, { once: true }))
 
+type Request = (method: string, input?: any, timeoutMs?: number) => Promise<any>
+type Hooks = { onError?: (e: Error) => void; onBuffer?: (end: number) => void }
+
 export class Player {
-  /** @param {HTMLVideoElement} video @param {(m: string, i: any) => Promise<any>} request */
-  constructor(video, request, { onError, onBuffer } = {}) {
+  video: HTMLVideoElement
+  request: Request
+  onError: (e: Error) => void
+  onBuffer: (end: number) => void
+  tracks: any[]
+  alive: boolean
+  reported = false
+  ms: MediaSource | null = null
+  url = ''
+  timer: ReturnType<typeof setInterval> | null = null
+  onSeeking: (() => void) | null = null
+
+  constructor(video: HTMLVideoElement, request: Request, { onError, onBuffer }: Hooks = {}) {
     this.video = video
     this.request = request
     this.onError = onError ?? (() => {})
@@ -125,8 +139,8 @@ export class Player {
     this.tick()
   }
 
-  async fetch(tr, start, len) {
-    const input = { key: tr.key, start }
+  async fetch(tr, start: number, len?: number) {
+    const input: { key: string; start: number; len?: number } = { key: tr.key, start }
     if (len) input.len = len // undefined is not JSON: the bridge refuses it
     const r = await this.request('tube.chunk', input)
     if (r.error) throw new Error(r.error)

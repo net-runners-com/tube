@@ -6,7 +6,13 @@
 //  - everything drawn into the page (text, placeholder, aria-label, title) is translated as it
 //    appears, when the whole text matches a key. Mark user content with data-no-i18n to skip it.
 //
-// Adding a language: copy ja.js to <code>.js, translate the values, add it to LANGS.
+// Adding a language: copy ja.ts to <code>.ts, translate the values, add it to DICTS and LANGS.
+
+import en from './en'
+import ja from './ja'
+
+/** Every language file, bundled (they are small). Add a new one here and to LANGS. */
+const DICTS: Record<string, Record<string, string>> = { en, ja }
 
 export const LANGS = [
   ['auto', 'System'],
@@ -57,14 +63,8 @@ export const current = () => code
 
 export async function setLang(pref) {
   code = resolve(pref)
-  let dict = {}
-  if (code !== 'en') {
-    try {
-      dict = (await import(`./${code}.js`)).default
-    } catch {
-      code = 'en'
-    }
-  }
+  const dict: Record<string, string> = DICTS[code] ?? {}
+  if (!DICTS[code]) code = 'en'
   compile(dict)
   document.documentElement.lang = code
   retranslateAll()
@@ -73,7 +73,7 @@ export async function setLang(pref) {
 const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (m, n) => (vars && n in vars ? String(vars[n]) : m))
 
 /** Translate a key, filling {placeholders} from vars. */
-export function t(key, vars) {
+export function t(key: string, vars?: Record<string, unknown>): string {
   return fill(raw.get(key) ?? key, vars)
 }
 

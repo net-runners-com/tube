@@ -1,0 +1,12 @@
+{
+  // The panel (panel/src): browser code, bundled by esbuild into panel/app.js.
+  // Loose for now — the shapes that matter are typed; the DOM glue is not (yet).
+  "extends": "./.orca/types/tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["orca", "orca-services", "orca-frame", "orca-host"]
+  },
+  "include": ["panel/src"]
+}
