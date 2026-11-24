@@ -15,6 +15,8 @@ Watch, listen and browse without leaving your workspace.
 
 </div>
 
+<img src="assets/features.jpg" alt="Everything in Tube" width="100%">
+
 ---
 
 ## Why Tube

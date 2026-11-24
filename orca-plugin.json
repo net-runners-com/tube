@@ -2,8 +2,7 @@
   "manifestVersion": 2,
   "id": "tube",
   "name": "Tube",
-  "version": "1.1.0",
-  "publisher": "net-runners-com",
+  "version": "1.1.1",
   "license": "MIT",
   "description": "YouTube in Orca's sidebar: browse, search and watch videos, Shorts and live streams, with a Lofi music-player mode, captions, playlists and your account. Works out of the box on macOS, Windows and Linux.",
   "icon": "assets/icon.png",
@@ -12,6 +11,11 @@
     "alt": "Tube panels in Orca: Home, a lofi live stream in Lofi mode with its visualizer, and Shorts"
   },
   "screenshots": [
+    {
+      "path": "assets/features.jpg",
+      "alt": "Everything Tube does: watch, listen, browse, your account, make it yours, just works",
+      "caption": "Everything in Tube"
+    },
     {
       "path": "assets/home.jpg",
       "alt": "Tube Home with subscriptions and recommendations, next to the watch page",
@@ -23,19 +27,14 @@
       "caption": "Lofi mode: a music player for long sessions"
     },
     {
-      "path": "assets/explore.jpg",
-      "alt": "Explore searching Shorts with Videos, Channels and Shorts tabs",
-      "caption": "Videos, channels and Shorts"
-    },
-    {
-      "path": "assets/watch.jpg",
-      "alt": "The watch page with actions, comments and more videos",
-      "caption": "Everything under the player"
-    },
-    {
       "path": "assets/pip.jpg",
       "alt": "A floating picture-in-picture window over Tube",
       "caption": "Picture-in-picture over any app"
+    },
+    {
+      "path": "assets/explore.jpg",
+      "alt": "Explore searching Shorts with Videos, Channels and Shorts tabs",
+      "caption": "Videos, channels and Shorts"
     },
     {
       "path": "assets/themes.jpg",

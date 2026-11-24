@@ -4281,7 +4281,7 @@ async function renderChannel() {
          <div class="mt-4 space-y-5">${c.videos.length ? tab === "shorts" ? shortGrid(c.videos) : c.videos.map(rowCard).join("") : empty(tab === "shorts" ? "This channel has no Shorts." : tab === "streams" ? "This channel has no live streams." : "No videos.")}</div>`;
   hydrate(el);
 }
-var ABOUT = { version: "1.1.0", author: "net-runners-com", repo: "https://github.com/net-runners-com/tube" };
+var ABOUT = { version: "1.1.1", author: "net-runners-com", repo: "https://github.com/net-runners-com/tube" };
 var LIB_TABS = () => S.account ? [["history", "History"], ["playlists", "Playlists"], ["watchlater", "Watch later"], ["liked", "Liked"], ["saved", "Saved"]] : [["history", "History"], ["playlists", "Playlists"], ["saved", "Saved"]];
 async function renderLibrary(view = "library") {
   const el = $("#v-" + view);
